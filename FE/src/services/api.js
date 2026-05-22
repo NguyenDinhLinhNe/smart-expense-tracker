@@ -22,6 +22,7 @@ api.interceptors.request.use((config) => {
 export const register = (userData) => api.post('/auth/register', userData);
 export const login = (userData) => api.post('/auth/login', userData);
 export const getProfile = () => api.get('/auth/profile');
+export const getUsers = () => api.get('/auth/users');
 
 // Transaction APIs
 export const getTransactions = (params) => api.get('/transactions', { params });
@@ -49,6 +50,7 @@ export const exportReport = (format, params) => api.get(`/reports/export/${forma
 export const getAIPredictions = (month) => api.get('/ai/predict', { params: { month } });
 export const getAIRecommendations = () => api.get('/ai/recommendations');
 export const getAIInsights = () => api.get('/ai/insights');
+export const askAIChat = (message) => api.post('/ai/chat', { message });
 
 // Dashboard API
 export const getDashboardData = () => api.get('/reports/dashboard');

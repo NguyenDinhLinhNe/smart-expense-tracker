@@ -55,10 +55,22 @@ def create_category():
             import random
             color = "#{:06x}".format(random.randint(0, 0xFFFFFF))
         
+        # Determine if creating a global category
+        is_global = data.get('is_global', False)
+        target_user_id = None
+        
+        if is_global:
+            current_user = User.query.get(user_id)
+            if not current_user or current_user.role != 'admin':
+                return jsonify({'error': 'Unauthorized. Only admins can create global categories.'}), 403
+            target_user_id = None
+        else:
+            target_user_id = user_id
+            
         # Kiểm tra trùng
         existing = Category.query.filter_by(
             name=data['name'],
-            user_id=user_id
+            user_id=target_user_id
         ).first()
         
         if existing:
@@ -70,7 +82,7 @@ def create_category():
             icon=data.get('icon', '📌'),
             color=color,
             type=data.get('type', 'expense'),
-            user_id=user_id
+            user_id=target_user_id
         )
         
         db.session.add(category)
@@ -83,7 +95,7 @@ def create_category():
         
     except Exception as e:
         db.session.rollback()
-        print("❌ Error:", str(e))  # THÊM DÒNG NÀY ĐỂ DEBUG
+        print("❌ Error:", str(e))
         return jsonify({'error': str(e)}), 500
 
 @category_bp.route('/<int:category_id>', methods=['PUT'])
@@ -91,10 +103,21 @@ def create_category():
 def update_category(category_id):
     try:
         user_id = get_jwt_identity()
-        category = Category.query.filter_by(id=category_id, user_id=user_id).first()
-        
+        current_user = User.query.get(user_id)
+        if not current_user:
+            return jsonify({'error': 'User not found'}), 401
+            
+        category = Category.query.get(category_id)
         if not category:
             return jsonify({'error': 'Category not found'}), 404
+            
+        # Check permissions
+        if category.user_id is None:
+            if current_user.role != 'admin':
+                return jsonify({'error': 'Unauthorized. Only admins can modify global categories.'}), 403
+        else:
+            if category.user_id != current_user.id and current_user.role != 'admin':
+                return jsonify({'error': 'Unauthorized to modify this category.'}), 403
         
         data = request.get_json()
         
@@ -123,10 +146,21 @@ def update_category(category_id):
 def delete_category(category_id):
     try:
         user_id = get_jwt_identity()
-        category = Category.query.filter_by(id=category_id, user_id=user_id).first()
-        
+        current_user = User.query.get(user_id)
+        if not current_user:
+            return jsonify({'error': 'User not found'}), 401
+            
+        category = Category.query.get(category_id)
         if not category:
             return jsonify({'error': 'Category not found'}), 404
+            
+        # Check permissions
+        if category.user_id is None:
+            if current_user.role != 'admin':
+                return jsonify({'error': 'Unauthorized. Only admins can delete global categories.'}), 403
+        else:
+            if category.user_id != current_user.id and current_user.role != 'admin':
+                return jsonify({'error': 'Unauthorized to delete this category.'}), 403
         
         # Check if category has transactions
         if category.transactions:

@@ -180,7 +180,7 @@ const Transactions = () => {
           >
             <option value="">All Categories</option>
             {categories.map(cat => (
-              <option key={cat.id} value={cat.id}>{cat.icon} {cat.name}</option>
+              <option key={cat.id} value={cat.id}>{cat.icon} {cat.name}{(!cat.user_id) ? ' 🔒' : ''}</option>
             ))}
           </select>
           
@@ -313,7 +313,7 @@ const Transactions = () => {
                   >
                     <option value="">Select Category</option>
                     {filteredCategories.map(cat => (
-                      <option key={cat.id} value={cat.id}>{cat.icon} {cat.name}</option>
+                      <option key={cat.id} value={cat.id}>{cat.icon} {cat.name}{(!cat.user_id) ? ' 🔒' : ''}</option>
                     ))}
                   </select>
                   <button

@@ -8,7 +8,7 @@ with app.app_context():
     print("🗄️  Clearing existing data...")
     # Xóa dữ liệu cũ
     Transaction.query.delete()
-    Category.query.filter(Category.user_id.isnot(None)).delete()
+    Category.query.delete() # Xóa toàn bộ danh mục bao gồm cả global để seed lại sạch sẽ
     User.query.delete()
     db.session.commit()
     
@@ -17,24 +17,25 @@ with app.app_context():
     admin = User(
         name='Admin User',
         email='admin@example.com',
-        password=generate_password_hash('admin123')
+        password=generate_password_hash('SecureExpense2026#'),
+        role='admin'
     )
     db.session.add(admin)
     db.session.commit()
     
     print("📁 Creating categories...")
-    # Tạo categories mặc định
+    # Tạo categories mặc định với user_id = None (Global Categories)
     default_categories = [
-        {'name': 'Food & Dining', 'icon': '🍔', 'color': '#FF6B6B', 'type': 'expense', 'user_id': admin.id},
-        {'name': 'Transportation', 'icon': '🚗', 'color': '#4ECDC4', 'type': 'expense', 'user_id': admin.id},
-        {'name': 'Shopping', 'icon': '🛍️', 'color': '#45B7D1', 'type': 'expense', 'user_id': admin.id},
-        {'name': 'Entertainment', 'icon': '🎬', 'color': '#96CEB4', 'type': 'expense', 'user_id': admin.id},
-        {'name': 'Bills & Utilities', 'icon': '💡', 'color': '#FFEAA7', 'type': 'expense', 'user_id': admin.id},
-        {'name': 'Healthcare', 'icon': '🏥', 'color': '#DDA0DD', 'type': 'expense', 'user_id': admin.id},
-        {'name': 'Education', 'icon': '📚', 'color': '#98D8C8', 'type': 'expense', 'user_id': admin.id},
-        {'name': 'Salary', 'icon': '💰', 'color': '#10B981', 'type': 'income', 'user_id': admin.id},
-        {'name': 'Freelance', 'icon': '💻', 'color': '#8B5CF6', 'type': 'income', 'user_id': admin.id},
-        {'name': 'Investment', 'icon': '📈', 'color': '#F59E0B', 'type': 'income', 'user_id': admin.id},
+        {'name': 'Food & Dining', 'icon': '🍔', 'color': '#FF6B6B', 'type': 'expense', 'user_id': None},
+        {'name': 'Transportation', 'icon': '🚗', 'color': '#4ECDC4', 'type': 'expense', 'user_id': None},
+        {'name': 'Shopping', 'icon': '🛍️', 'color': '#45B7D1', 'type': 'expense', 'user_id': None},
+        {'name': 'Entertainment', 'icon': '🎬', 'color': '#96CEB4', 'type': 'expense', 'user_id': None},
+        {'name': 'Bills & Utilities', 'icon': '💡', 'color': '#FFEAA7', 'type': 'expense', 'user_id': None},
+        {'name': 'Healthcare', 'icon': '🏥', 'color': '#DDA0DD', 'type': 'expense', 'user_id': None},
+        {'name': 'Education', 'icon': '📚', 'color': '#98D8C8', 'type': 'expense', 'user_id': None},
+        {'name': 'Salary', 'icon': '💰', 'color': '#10B981', 'type': 'income', 'user_id': None},
+        {'name': 'Freelance', 'icon': '💻', 'color': '#8B5CF6', 'type': 'income', 'user_id': None},
+        {'name': 'Investment', 'icon': '📈', 'color': '#F59E0B', 'type': 'income', 'user_id': None},
     ]
     
     for cat_data in default_categories:
@@ -44,8 +45,8 @@ with app.app_context():
     db.session.commit()
     
     print("💰 Creating sample transactions...")
-    # Lấy categories vừa tạo
-    categories = {c.name: c for c in Category.query.filter_by(user_id=admin.id).all()}
+    # Lấy categories vừa tạo (tìm theo user_id is None)
+    categories = {c.name: c for c in Category.query.filter(Category.user_id.is_(None)).all()}
     
     # Tạo transactions mẫu
     today = datetime.now().date()
@@ -109,4 +110,4 @@ with app.app_context():
     print(f"   - Transactions: {Transaction.query.count()}")
     print("\n🔐 Login credentials:")
     print("   Email: admin@example.com")
-    print("   Password: admin123")
+    print("   Password: SecureExpense2026#")

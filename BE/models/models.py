@@ -11,6 +11,7 @@ class User(db.Model):
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
+    role = db.Column(db.String(20), default='user')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     # Relationships
@@ -22,11 +23,12 @@ class User(db.Model):
             'id': self.id,
             'name': self.name,
             'email': self.email,
+            'role': self.role,
             'created_at': self.created_at.isoformat()
         }
     
     def get_token(self):
-        return create_access_token(identity=str(self.id))
+        return create_access_token(identity=str(self.id), additional_claims={'role': self.role})
 
 class Category(db.Model):
     __tablename__ = 'categories'
@@ -48,7 +50,8 @@ class Category(db.Model):
             'name': self.name,
             'icon': self.icon,
             'color': self.color,
-            'type': self.type
+            'type': self.type,
+            'user_id': self.user_id
         }
 
 class Transaction(db.Model):

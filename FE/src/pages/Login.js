@@ -42,7 +42,7 @@ const Login = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full pl-10 pr-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500 transition-colors"
-                placeholder="admin@example.com"
+                placeholder="email@example.com"
                 required
               />
             </div>
@@ -87,9 +87,6 @@ const Login = () => {
             <Link to="/register" className="text-blue-400 hover:text-blue-300 font-medium">
               Create one
             </Link>
-          </p>
-          <p className="text-xs text-gray-500 mt-4">
-            Demo: admin@example.com / admin123
           </p>
         </div>
       </div>

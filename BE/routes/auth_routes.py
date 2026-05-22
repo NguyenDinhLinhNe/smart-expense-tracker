@@ -42,8 +42,7 @@ def register():
         db.session.add(user)
         db.session.commit()
         
-        # Create default categories for user
-        create_default_categories(user.id)
+        # We do not create duplicate custom categories for each user anymore since they inherit Global Categories (user_id = None)
         
         return jsonify({
             'message': 'User created successfully',
@@ -88,6 +87,22 @@ def get_profile():
             return jsonify({'error': 'User not found'}), 404
         
         return jsonify({'user': user.to_dict()}), 200
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@auth_bp.route('/users', methods=['GET'])
+@jwt_required()
+def get_users():
+    try:
+        current_user_id = get_jwt_identity()
+        current_user = User.query.get(current_user_id)
+        
+        if not current_user or current_user.role != 'admin':
+            return jsonify({'error': 'Unauthorized. Admin access required.'}), 403
+            
+        users = User.query.all()
+        return jsonify({'users': [u.to_dict() for u in users]}), 200
         
     except Exception as e:
         return jsonify({'error': str(e)}), 500

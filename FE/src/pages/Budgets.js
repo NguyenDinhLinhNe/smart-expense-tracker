@@ -222,7 +222,7 @@ const Budgets = () => {
                 >
                   <option value="">Select Category</option>
                   {categories.map(cat => (
-                    <option key={cat.id} value={cat.id}>{cat.icon} {cat.name}</option>
+                    <option key={cat.id} value={cat.id}>{cat.icon} {cat.name}{(!cat.user_id) ? ' 🔒' : ''}</option>
                   ))}
                 </select>
               </div>

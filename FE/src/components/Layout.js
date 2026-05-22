@@ -9,7 +9,8 @@ import {
   FaRobot, 
   FaSignOutAlt,
   FaBars,
-  FaTimes
+  FaTimes,
+  FaUserShield
 } from 'react-icons/fa';
 
 const Layout = () => {
@@ -29,6 +30,10 @@ const Layout = () => {
     { path: '/reports', icon: FaChartLine, label: 'Reports' },
     { path: '/ai', icon: FaRobot, label: 'AI Insights' },
   ];
+
+  if (user?.role === 'admin') {
+    menuItems.push({ path: '/admin', icon: FaUserShield, label: 'Admin Panel' });
+  }
 
   return (
     <div className="flex h-screen bg-gray-900">

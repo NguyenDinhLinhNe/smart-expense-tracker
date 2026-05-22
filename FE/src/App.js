@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './contexts/AuthContext';
 import PrivateRoute from './components/PrivateRoute';
+import AdminRoute from './components/AdminRoute';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
@@ -10,6 +11,7 @@ import Transactions from './pages/Transactions';
 import Budgets from './pages/Budgets';
 import Reports from './pages/Reports';
 import AIPage from './pages/AIPage';
+import AdminPanel from './pages/AdminPanel';
 import Layout from './components/Layout';
 
 function App() {
@@ -29,6 +31,10 @@ function App() {
               <Route path="/budgets" element={<Budgets />} />
               <Route path="/reports" element={<Reports />} />
               <Route path="/ai" element={<AIPage />} />
+              
+              <Route element={<AdminRoute />}>
+                <Route path="/admin" element={<AdminPanel />} />
+              </Route>
             </Route>
           </Route>
         </Routes>

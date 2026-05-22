@@ -15,12 +15,13 @@ def init_database():
         admin = User(
             name="Admin User",
             email="admin@example.com",
-            password=generate_password_hash("admin123")
+            password=generate_password_hash("SecureExpense2026#"),
+            role='admin'
         )
         db.session.add(admin)
         db.session.commit()
         
-        # Create categories for admin
+        # Create categories for admin (Global Categories)
         categories = [
             {'name': 'Food', 'icon': '🍔', 'color': '#FF6B6B', 'type': 'expense'},
             {'name': 'Transport', 'icon': '🚗', 'color': '#4ECDC4', 'type': 'expense'},
@@ -37,14 +38,14 @@ def init_database():
                 icon=cat['icon'],
                 color=cat['color'],
                 type=cat['type'],
-                user_id=admin.id
+                user_id=None
             )
             db.session.add(category)
         
         db.session.commit()
         
         # Create sample transactions
-        categories_db = Category.query.filter_by(user_id=admin.id).all()
+        categories_db = Category.query.filter(Category.user_id.is_(None)).all()
         category_dict = {c.name: c for c in categories_db}
         
         sample_transactions = [
@@ -78,7 +79,7 @@ def init_database():
         print("✅ Database initialized successfully!")
         print("📝 Login credentials:")
         print("   Email: admin@example.com")
-        print("   Password: admin123")
+        print("   Password: SecureExpense2026#")
 
 if __name__ == '__main__':
     init_database()
