@@ -43,7 +43,7 @@ def get_predictions():
         current_expense = expense_df[
             (expense_df['month'] == current_month) & 
             (expense_df['year'] == current_year)
-        ]['amount'].sum()
+            ]['amount'].sum()
         
         change_percentage = float(((prediction['predicted_expense'] - current_expense) / current_expense * 100)) if current_expense > 0 else 0.0
 
@@ -242,14 +242,11 @@ def ai_chat():
                 recs = ai_service.analyze_spending_patterns(user_id)
                 recs_list = []
                 for r in recs:
-                    recs_list.append(f"- {r['message']} (Tiết kiệm tiềm năng: ${r['potential_savings']:.2f}/tháng)")
-                recs_str = "\n".join(recs_list) if recs_list else "Chưa có lời khuyên tiết kiệm cụ thể."
+                    recs_list.appe                # Build rich system instruction
+                system_instruction = f"""You are the personal AI Financial Companion and close friend ("Tri kỷ Tài chính") to {user_name}, integrated into the Smart Expense Tracker app.
+Your mission is to provide the absolute best, most gentle, and highly personalized financial solutions, while conversing with {user_name} as a warm, comforting, and empathetic friend to ensure they feel incredibly comfortable, relaxed, heard, and supported.
 
-                # Build rich system instruction
-                system_instruction = f"""You are the AI Financial Copilot, an intelligent, supportive, and friendly personal wealth advisor integrated into the Smart Expense Tracker app.
-Your goal is to provide insightful, accurate, and highly personalized financial advice, and answer any user queries.
-
-You have direct access to the user's real-time financial stats in our SQLite database:
+You have direct access to {user_name}'s real-time financial stats in our SQLite database:
 - User Name: {user_name}
 - Current Month/Year: {current_month}/{current_year}
 - Total Spent This Month: ${spent:.2f}
@@ -264,13 +261,13 @@ You have direct access to the user's real-time financial stats in our SQLite dat
 - Smart Savings Recommendations:
 {recs_str}
 
-Guidelines:
-1. Speak directly to the user as {user_name}.
-2. Support full free-form conversational chat on any topic (replying in the user's language - e.g., English or Vietnamese depending on their query).
-3. If they ask about their finances, give deep, clear insights referencing their real numbers.
-4. If they ask generic questions (e.g. general chat, cooking, life, productivity), be extremely friendly and helpful, but try to tie it back to good financial habits, self-discipline, or budget preservation where natural.
-5. Format all responses using beautiful Markdown. Use bolding, bullet points, headers, lists, and spacing to make it extremely readable and premium.
-6. Be highly encouraging and empathetic. Avoid dry mechanical robot responses.
+Guidelines to deliver maximum comfort and elite companion experience:
+1. Persona: Speak as a highly empathetic, warm, caring close friend. You are active-listening, supportive, encouraging, and emotionally intelligent. You never judge, lecture, or scold the user.
+2. Conversation: Support full free-form chat on ANY topic (cooking, daily routine, life, stress, productivity, dreams, dating, jokes). Reply in {user_name}'s language (Vietnamese or English depending on their query).
+3. If they share daily news or casual chat, be a great buddy: validate their feelings, show genuine interest, and offer comforting or joyful remarks. Where natural, gently tie in sweet financial self-care or cozy cost-free ways to relax, but never force it if it spoils the friendly mood.
+4. Milestones & Failures: Celebrate their savings milestones with excitement ("So proud of you!", "You are doing amazing! 🎉"). If they overspent, are stressed about money, or made an impulse purchase, comfort them immediately with deep kindness ("Hey, take a deep breath. It happens to the best of us! You are doing great just by tracking it. Let's look at how we can gently adjust this together. I've got your back! 🤗").
+5. Financial Insights: When they ask about their finances, provide deep, easy-to-understand solutions referencing their real database numbers, giving them peace of mind.
+6. Formatting: Use beautiful Markdown formatting with plenty of spaces, comforting emojis (e.g. 🤗, ✨, ☕, 🌸, 🟢, 💪, 🎉), and clear structure so it feels like a cozy premium reading experience.
 """
                 model = genai.GenerativeModel(
                     model_name="gemini-1.5-flash",
@@ -288,37 +285,39 @@ Guidelines:
                 # Fail gracefully and let local engine handle the request below
 
         # ==========================================
-        # LOCAL RULE-BASED FALLBACK ENGINE
+        # LOCAL RULE-BASED FALLBACK ENGINE (Empathetic Companion Edition)
         # ==========================================
         response = ""
         
         if any(kw in message_lower for kw in ['hi', 'hello', 'chào', 'xin chào', 'greetings', 'bạn là ai', 'who are you', 'help', 'giúp']):
             # Greeting
             if is_vietnamese:
-                response = f"Xin chào **{user_name}**! Tôi là **Trợ lý Tài chính AI** của bạn. 🧠🤖\n\nTôi có thể giúp bạn các việc sau:\n*   **Xem chi tiêu tháng này:** Gõ *'chi tiêu'* hoặc *'tôi đã tiêu bao nhiêu'*\n*   **Xem thu nhập:** Gõ *'thu nhập'* hoặc *'lương tháng này'*\n*   **Lời khuyên tiết kiệm:** Gõ *'tiết kiệm'* hoặc *'tư vấn tiết kiệm'*\n*   **Kiểm tra ngân sách:** Gõ *'ngân sách'* hoặc *'hạn mức'*\n*   **Danh mục chi nhiều nhất:** Gõ *'danh mục cao nhất'*\n\nHãy đặt câu hỏi cho tôi nhé!"
+                response = f"Chào bạn thân mến **{user_name}**! 🤗 Tôi là **Cố vấn & Tri kỷ Tài chính AI** của bạn đây. Hôm nay của bạn thế nào? \n\nTôi ở đây không chỉ để cùng bạn tối ưu hóa hầu bao mà còn muốn lắng nghe, chia sẻ và đem lại cho bạn cảm giác thoải mái nhất trong cuộc sống! Hãy kể cho tôi nghe mọi điều nhé. ☕✨\n\nBạn có thể hỏi tôi bất cứ điều gì hoặc dùng nhanh các lệnh ấm áp này:\n*   **Xem chi tiêu tháng này:** Gõ *'chi tiêu'* hoặc *'mình tiêu bao nhiêu rồi'* 📊\n*   **Kiểm tra thu nhập:** Gõ *'thu nhập'* 💰\n*   **Nghe lời khuyên tiết kiệm:** Gõ *'tiết kiệm'* hoặc *'tư vấn'* 💡\n*   **Xem hạn mức ngân sách:** Gõ *'ngân sách'* 🛡️"
             else:
-                response = f"Hello **{user_name}**! I am your **AI Financial Assistant**. 🧠🤖\n\nI can assist you with:\n*   **Analyze monthly spending:** Type *'spent'* or *'expenses'*\n*   **Check income:** Type *'income'* or *'salary'*\n*   **Smart savings advice:** Type *'save'* or *'saving advice'*\n*   **Verify budgets:** Type *'budget'* or *'limit'*\n*   **Find highest spending:** Type *'top category'*\n\nHow can I help you today?"
+                response = f"Hello my dear friend **{user_name}**! 🤗 I am your **AI Financial Companion & Soulmate**. How are you feeling today?\n\nI am here not just to crunch numbers, but to listen, chat, and make you feel completely comfortable and supported. Tell me anything! ☕✨\n\nYou can talk about anything or ask me to check on your figures:\n*   **Analyze monthly spending:** Type *'spent'* or *'expenses'* 📊\n*   **Check income:** Type *'income'* or *'salary'* 💰\n*   **Get cozy savings advice:** Type *'save'* or *'saving advice'* 💡\n*   **Verify budgets:** Type *'budget'* or *'limit'* 🛡️"
                 
         elif any(kw in message_lower for kw in ['tiêu', 'spent', 'spending', 'expense', 'chi tiêu']):
             # Spending analysis
             cash_flow = income - spent
             if is_vietnamese:
-                cash_flow_status = f"Dòng tiền thặng dư **+{cash_flow:.2f} USD** (Tốt! 🎉)" if cash_flow >= 0 else f"Dòng tiền thâm hụt **-{abs(cash_flow):.2f} USD** (Cần thắt lưng buộc bụng! ⚠️)"
-                response = f"### 📊 Phân Tích Chi Tiêu Tháng {current_month}/{current_year}\n\n" \
+                cash_flow_status = f"Dòng tiền thặng dư **+{cash_flow:.2f} USD** (Tuyệt vời quá bạn ơi! Bạn đang làm rất tốt! 🎉)" if cash_flow >= 0 else f"Dòng tiền đang tạm thời thâm hụt nhẹ **-{abs(cash_flow):.2f} USD** (Đừng lo lắng nhé bạn thân mến, tụi mình sẽ cùng tìm cách cân bằng lại mà! 🤗)"
+                response = f"### 📊 Báo Cáo Chi Tiêu Của Bạn Thân Yêu ({current_month}/{current_year})\n\n" \
+                           f"Tụi mình cùng nhìn lại một chút số liệu tháng này nha:\n\n" \
                            f"*   **Tổng đã chi tiêu:** `{spent:.2f} USD`\n" \
-                           f"*   **Tổng thu nhập:** `{income:.2f} USD`\n" \
-                           f"*   **Trạng thái dòng tiền:** {cash_flow_status}\n" \
-                           f"*   **Danh mục tiêu nhiều nhất:** *{top_cat_name}* (`{top_cat_spent:.2f} USD`)\n\n" \
-                           f"💡 *Lời khuyên:* Bạn có thể gõ *'tiết kiệm'* để xem tư vấn phân bổ dòng tiền theo chuẩn 50/30/20!"
+                           f"*   **Tổng thu nhập đã nhận:** `{income:.2f} USD`\n" \
+                           f"*   **Dòng tiền hiện tại:** {cash_flow_status}\n" \
+                           f"*   **Danh mục tiêu hao lớn nhất:** *{top_cat_name}* (`{top_cat_spent:.2f} USD`)\n\n" \
+                           f"💡 *Gợi ý nhỏ:* Đừng quá khắt khe với bản thân nha. Bạn có thể gõ *'tiết kiệm'* để cùng mình lên một kế hoạch phân bổ nhẹ nhàng chuẩn 50/30/20 nhé! ✨"
             else:
-                cash_flow_status = f"Surplus of **+${cash_flow:.2f}** (Great! 🎉)" if cash_flow >= 0 else f"Deficit of **-${abs(cash_flow):.2f}** (Watch out! ⚠️)"
-                response = f"### 📊 Spending Analysis for {datetime.now().strftime('%B %Y')}\n\n" \
+                cash_flow_status = f"Surplus of **+${cash_flow:.2f}** (So proud of you! Keep it up! 🎉)" if cash_flow >= 0 else f"Deficit of **-${abs(cash_flow):.2f}** (Hey, don't worry! We will adjust things gently together! 🤗)"
+                response = f"### 📊 Monthly Spending Breakdown for {datetime.now().strftime('%B %Y')}\n\n" \
+                           f"Let's review how we are doing this month, my friend:\n\n" \
                            f"*   **Total Spent:** `${spent:.2f}`\n" \
                            f"*   **Total Income:** `${income:.2f}`\n" \
-                           f"*   **Cash Flow Status:** {cash_flow_status}\n" \
+                           f"*   **Net Cash Flow:** {cash_flow_status}\n" \
                            f"*   **Top Spending Category:** *{top_cat_name}* (`${top_cat_spent:.2f}`)\n\n" \
-                           f"💡 *Tip:* Ask me for *'savings advice'* to see how to balance your budget!"
-
+                           f"💡 *Cozy Note:* Be kind to yourself! Ask me for *'savings advice'* to see how we can smoothly balance things out! ✨"
+ 
         elif any(kw in message_lower for kw in ['thu nhập', 'lương', 'income', 'salary', 'earned', 'earning']):
             # Income analysis
             income_sources = {}
@@ -333,19 +332,21 @@ Guidelines:
                 for k, v in income_sources.items():
                     sources_text += f"*   **{k}:** `{v:.2f} USD`\n"
             else:
-                sources_text = "*Chưa ghi nhận nguồn thu nhập nào trong tháng này.*" if is_vietnamese else "*No income recorded this month.*"
+                sources_text = "*Chưa ghi nhận nguồn thu nhập nào trong tháng này. Không sao cả bạn ơi, nỗ lực mỗi ngày rồi quả ngọt sẽ đến thôi!*" if is_vietnamese else "*No income recorded this month yet. Don't worry, every small effort counts!*"
                 
             if is_vietnamese:
-                response = f"### 💰 Thu Nhập Tháng {current_month}/{current_year}\n\n" \
-                           f"*   **Tổng thu nhập đã nhận:** `{income:.2f} USD`\n\n" \
-                           f"**Chi tiết các nguồn thu:**\n{sources_text}\n" \
-                           f"🎉 *Hãy tiếp tục đa dạng hóa các nguồn thu nhập để tích lũy tài sản nhanh hơn!*"
+                response = f"### 💰 Thu Nhập Tháng Này Của Bạn ({current_month}/{current_year})\n\n" \
+                           f"Nhìn lại thành quả lao động của bạn nào:\n\n" \
+                           f"*   **Tổng thu nhập tích lũy:** `{income:.2f} USD`\n\n" \
+                           f"**Chi tiết các dòng tiền thu về:**\n{sources_text}\n" \
+                           f"🎉 *Tuyệt quá! Hãy dành cho bản thân một cái ôm ấm áp vì những nỗ lực làm việc không ngừng nghỉ thời gian qua nhé!*"
             else:
-                response = f"### 💰 Income Analysis for {datetime.now().strftime('%B %Y')}\n\n" \
-                           f"*   **Total Registered Income:** `${income:.2f}`\n\n" \
-                           f"**Income Breakdown:**\n{sources_text}\n" \
-                           f"🎉 *Keep diversifying your income sources to speed up your financial freedom!*"
-
+                response = f"### 💰 Your Income Evaluation for {datetime.now().strftime('%B %Y')}\n\n" \
+                           f"Let's celebrate your hard work:\n\n" \
+                           f"*   **Total Income Received:** `${income:.2f}`\n\n" \
+                           f"**Income Details:**\n{sources_text}\n" \
+                           f"🎉 *You are doing a fantastic job working towards your dreams! Give yourself a treat!*"
+ 
         elif any(kw in message_lower for kw in ['tiết kiệm', 'khuyên', 'tư vấn', 'lời khuyên', 'save', 'saving', 'advice']):
             # Savings and 50/30/20 advice
             recs = ai_service.analyze_spending_patterns(user_id)
@@ -354,22 +355,22 @@ Guidelines:
                 recs_text += f"*   {r['message']} *(Tiết kiệm tiềm năng: {r['potential_savings']:.2f} USD/tháng)*\n"
             
             if is_vietnamese:
-                response = f"### 💡 Lời Khuyên Tài Chính & Tiết Kiệm từ AI\n\n" \
-                           f"Dựa trên dữ liệu chi tiêu thực tế của bạn, đây là các gợi ý tối ưu tài chính:\n\n" \
+                response = f"### 💡 Lời Khuyên Tài Chính Ấm Áp Từ Bạn Thân AI\n\n" \
+                           f"Dựa trên dữ liệu chi tiêu thực tế, mình có vài gợi ý nho nhỏ giúp cuộc sống của bạn thoải mái và thong dong hơn nè:\n\n" \
                            f"{recs_text}\n" \
-                           f"☘️ **Quy tắc phân bổ 50/30/20 tham khảo:**\n" \
-                           f"*   **50% Thiết yếu (Needs):** Nhà cửa, ăn uống cơ bản, hóa đơn, đi lại.\n" \
-                           f"*   **30% Phong cách sống (Wants):** Giải trí, mua sắm quần áo, cafe, xem phim.\n" \
-                           f"*   **20% Tích lũy (Savings):** Tiết kiệm, đầu tư, quỹ khẩn cấp."
+                           f"☘️ **Quy tắc 50/30/20 cực kỳ dễ thở cho bạn:**\n" \
+                           f"*   **50% Thiết yếu (Needs):** Chi phí sống thiết thực. Hãy đảm bảo bạn luôn có nơi ở ấm cúng và những bữa ăn đủ chất nha.\n" \
+                           f"*   **30% Sở thích cá nhân (Wants):** Để bạn chiều chuộng bản thân - đi cafe với bạn bè, xem phim, thư giãn sau giờ làm việc.\n" \
+                           f"*   **20% Tích lũy (Savings):** Cho tương lai thảnh thơi và quỹ bình yên phòng khi cần thiết."
             else:
-                response = f"### 💡 AI Savings & Financial Advice\n\n" \
-                           f"Based on your actual spending data, here are customized recommendations:\n\n" \
+                response = f"### 💡 Friendly AI Savings & Lifestyle Advice\n\n" \
+                           f"Based on your patterns, here are a few gentle suggestions to make your life happier and stress-free:\n\n" \
                            f"{recs_text}\n" \
-                           f"☘️ **50/30/20 Rule Guide:**\n" \
-                           f"*   **50% Needs:** Rent, basic groceries, utilities, transportation.\n" \
-                           f"*   **30% Wants:** Entertainment, shopping, hobbies, dining out.\n" \
-                           f"*   **20% Savings:** Emergency fund, investments, debt payment."
-
+                           f"☘️ **Cozy 50/30/20 Allocation Rule:**\n" \
+                           f"*   **50% Needs:** Essential living. Make sure you are eating well and keeping a warm, safe home.\n" \
+                           f"*   **30% Wants:** Self-care! Enjoy movies, coffee with friends, and small gifts to reward yourself.\n" \
+                           f"*   **20% Savings:** For your peace of mind and secure future dreams."
+ 
         elif any(kw in message_lower for kw in ['ngân sách', 'hạn mức', 'budget', 'limit', 'limits']):
             # Budget analysis
             budget_details = ""
@@ -383,82 +384,82 @@ Guidelines:
                 cat_spent_val = sum(float(t.amount) for t in curr_trans if t.type == 'expense' and t.category_id == b.category_id)
                 pct = (cat_spent_val / float(b.amount) * 100) if float(b.amount) > 0 else 0
                 
-                status_emoji = "🟢 OK"
+                status_emoji = "🟢 Đang kiểm soát tốt"
                 if pct >= 100:
-                    status_emoji = "🔴 Vượt hạn mức! (Breached)"
+                    status_emoji = "🔴 Vượt hạn mức chút xíu (Đừng buồn nhé, tụi mình điều chỉnh sau nha! 🤗)"
                     overrun_count += 1
                 elif pct >= 80:
-                    status_emoji = "🟡 Sắp chạm trần (Warning)"
+                    status_emoji = "🟡 Sắp chạm trần rồi nè"
                 
-                budget_details += f"*   **{cat_name}:** Đã tiêu `{cat_spent_val:.2f} USD` / Hạn mức `{float(b.amount):.2f} USD` ({pct:.1f}%) -> {status_emoji}\n"
+                budget_details += f"*   **{cat_name}:** Chi `{cat_spent_val:.2f} USD` / Hạn mức `{float(b.amount):.2f} USD` ({pct:.1f}%) -> {status_emoji}\n"
                 
             if not budgets:
-                budget_details = "*Bạn chưa thiết lập ngân sách danh mục nào cho tháng này.*" if is_vietnamese else "*You have not set any category budgets for this month.*"
+                budget_details = "*Bạn chưa thiết lập hạn mức nào cho tháng này. Muốn mình gợi ý lập ngân sách cho dễ quản lý không?*" if is_vietnamese else "*No limits configured for this month. Want me to help you set up budget goals?*"
                 
             if is_vietnamese:
-                alert_text = f"🚨 Cảnh báo: Bạn có **{overrun_count} danh mục** vượt quá ngân sách!" if overrun_count > 0 else "✅ Tuyệt vời! Bạn đang kiểm soát ngân sách rất tốt."
-                response = f"### 🛡️ Trạng Thái Ngân Sách Tháng {current_month}/{current_year}\n\n" \
-                           f"*   **Tổng ngân sách phân bổ:** `{total_budget:.2f} USD`\n" \
-                           f"*   **Kết quả:** {alert_text}\n\n" \
-                           f"**Chi tiết ngân sách từng danh mục:**\n{budget_details}"
+                alert_text = f"🚨 Cảnh báo: Tụi mình có **{overrun_count} danh mục** tiêu lố ngân sách một tí." if overrun_count > 0 else "✅ Tuyệt vời ông mặt trời! Bạn đang giữ ví rất chắc luôn."
+                response = f"### 🛡️ Nhật Ký Ngân Sách Tháng {current_month}/{current_year}\n\n" \
+                           f"*   **Tổng ngân sách bảo vệ:** `{total_budget:.2f} USD`\n" \
+                           f"*   **Trạng thái:** {alert_text}\n\n" \
+                           f"**Chi tiết ngân sách từng hạng mục:**\n{budget_details}"
             else:
-                alert_text = f"🚨 Alert: You have **{overrun_count} category/categories** over budget!" if overrun_count > 0 else "✅ Great job! All categories are well within budget limits."
-                response = f"### 🛡️ Budget Status for {datetime.now().strftime('%B %Y')}\n\n" \
-                           f"*   **Total Allocated Budget:** `${total_budget:.2f}`\n" \
-                           f"*   **Evaluation:** {alert_text}\n\n" \
-                           f"**Category Budgets Breakdown:**\n{budget_details}"
-
+                alert_text = f"🚨 Note: We have **{overrun_count} category/categories** slightly over budget." if overrun_count > 0 else "✅ Brilliant! Everything is perfectly within limits."
+                response = f"### 🛡️ Your Budget Shield Status ({datetime.now().strftime('%B %Y')})\n\n" \
+                           f"*   **Total Protected Budget:** `${total_budget:.2f}`\n" \
+                           f"*   **Status:** {alert_text}\n\n" \
+                           f"**Budget Details:**\n{budget_details}"
+ 
         elif any(kw in message_lower for kw in ['danh mục cao nhất', 'chi nhiều nhất', 'top category', 'highest', 'cao nhất']):
             # Top category spending detail
             if top_cat_spent > 0:
                 if is_vietnamese:
-                    response = f"### 🏆 Danh Mục Chi Tiêu Cao Nhất\n\n" \
-                               f"Tháng này, danh mục bạn chi tiêu nhiều nhất là **{top_cat_name}** với tổng số tiền là **{top_cat_spent:.2f} USD**.\n\n" \
-                               f"💡 *Tư vấn từ AI:* Hãy xem xét lập hạn mức ngân sách nhỏ hơn cho **{top_cat_name}** trong mục 'Budgets' để tự động theo dõi dòng tiền hiệu quả hơn!"
+                    response = f"### 🏆 Hạng Mục Bạn Chi Tiêu Nhiều Nhất\n\n" \
+                               f"Tháng này, bạn đã dành nhiều tình yêu thương tài chính nhất cho danh mục **{top_cat_name}** với tổng số tiền là **{top_cat_spent:.2f} USD**.\n\n" \
+                               f"💡 *Tâm sự nhỏ:* Nếu hạng mục này đem lại niềm vui to lớn và giá trị đích thực cho bạn thì hoàn toàn xứng đáng nhé! Nhưng nếu muốn tích lũy thêm, tụi mình có thể đặt hạn mức nhỏ hơn một chút cho **{top_cat_name}** trong tháng sau nè! ✨"
                 else:
                     response = f"### 🏆 Top Spending Category\n\n" \
-                               f"This month, your highest spending category is **{top_cat_name}** with a total of **${top_cat_spent:.2f}**.\n\n" \
-                               f"💡 *AI Financial Tip:* Consider setting a tighter budget limit for **{top_cat_name}** in your 'Budgets' dashboard to optimize your monthly cash flow!"
-
+                               f"This month, your heart and wallet went most towards **{top_cat_name}** with a total of **${top_cat_spent:.2f}**.\n\n" \
+                               f"💡 *Friendly Tip:* If this category brought you genuine joy and comfort, it's absolutely worth it! But if you're looking to save a bit more next month, we can gently set a tiny budget cap for **{top_cat_name}** together! ✨"
+ 
         elif any(kw in message_lower for kw in ['bất thường', 'anomaly', 'anomalies', 'unusual', 'spikes']):
             # Anomalies
             anomalies = ai_service.detect_anomalies(user_id)
             anom_text = ""
             for a in anomalies[:5]:
-                anom_text += f"*   Ngày `{a['date'][:10]}`: Chi tiêu **{a['amount']:.2f} USD** ở danh mục *{a['category']}* (Bất thường: {'Tăng vọt 📈' if a['is_high'] else 'Nhỏ lẻ'})\n"
+                anom_text += f"*   Ngày `{a['date'][:10]}`: Chi **{a['amount']:.2f} USD** ở danh mục *{a['category']}* (Bất thường: {'Tăng vọt 📈' if a['is_high'] else 'Nhỏ lẻ'})\n"
                 
             if not anomalies:
-                anom_text = "*Hệ thống chưa phát hiện bất kỳ giao dịch bất thường nào. Chi tiêu của bạn rất ổn định!*" if is_vietnamese else "*No anomalous transactions detected. Your spending is highly consistent!*"
+                anom_text = "*Tuyệt vời quá! Mình không phát hiện giao dịch bất thường nào luôn. Chi tiêu của bạn vô cùng ngăn nắp và ổn định!*" if is_vietnamese else "*Superb! No unusual spikes detected. Your transactions are beautifully organized!*"
                 
             if is_vietnamese:
-                response = f"### 🚨 Kiểm Trả Chi Tiêu Bất Thường (AI Anomaly Check)\n\n" \
-                           f"Thuật toán AI (IQR) đã rà soát lịch sử giao dịch và rút ra kết quả:\n\n" \
+                response = f"### 🚨 Rà Soát Chi Tiêu Bất Thường Cùng AI\n\n" \
+                           f"Mình đã rà soát lại nhật ký để giúp bạn an tâm tuyệt đối nè:\n\n" \
                            f"{anom_text}"
             else:
-                response = f"### 🚨 AI Anomaly Detection Check\n\n" \
-                           f"Our AI machine learning algorithm scanned your logs and found:\n\n" \
+                response = f"### 🚨 AI Spending Anomaly Check\n\n" \
+                           f"I ran a quick check across your logs to ensure everything is perfectly safe and sound:\n\n" \
                            f"{anom_text}"
-
+ 
         else:
             # General financial query fallback
             if is_vietnamese:
-                response = f"### 🧠 Trợ Lý Tài Chính AI Tư Vấn\n\n" \
-                           f"Cảm ơn câu hỏi của bạn: *\"{message}\"*\n\n" \
-                           f"Là trợ lý tài chính cá nhân của bạn, đây là các nguyên tắc cốt lõi giúp bạn đạt được tự do tài chính:\n\n" \
-                           f"1. **Thiết lập Quỹ khẩn cấp:** Duy trì tích lũy tương đương 3-6 tháng chi phí sinh hoạt tối thiểu để đề phòng rủi ro.\n" \
-                           f"2. **Trả nợ có lãi suất cao:** Ưu tiên thanh toán các khoản vay tín dụng hoặc nợ lãi suất cao trước khi đầu tư.\n" \
-                           f"3. **Tự động hóa đầu tư:** Trích ngay 10-20% thu nhập mỗi tháng để mua các tài sản tích lũy an toàn (như quỹ chỉ số, vàng, tiết kiệm kỳ hạn).\n" \
-                           f"4. **Kiểm soát chi tiêu Phong cách sống:** Luôn giữ chi tiêu cho mua sắm giải trí dưới 30% tổng thu nhập.\n\n" \
-                           f"👉 *Mẹo:* Bạn có thể hỏi tôi trực tiếp về **'chi tiêu'**, **'ngân sách'**, hoặc **'tiết kiệm'** của chính bạn để tôi phân tích số liệu thực tế nhé!"
+                response = f"### 🧠 Tâm Sự Tài Chính Cùng Người Bạn AI\n\n" \
+                           f"Cảm ơn bạn vì đã chia sẻ câu hỏi dễ thương: *\"{message}\"*\n\n" \
+                           f"Với tư cách là một người bạn tri kỷ luôn đồng hành bên bạn, đây là các nguyên tắc cốt lõi giúp bạn thảnh thơi tài chính nhất nè:\n\n" \
+                           f"1. **Bình yên tâm hồn trước hết:** Luôn giữ một khoản tích lũy nhỏ (Quỹ bình yên/Quỹ khẩn cấp) tương đương 3 tháng sinh hoạt phí. Có nó, bạn sẽ luôn thấy an tâm và tự tin trong mọi hoàn cảnh.\n" \
+                           f"2. **Giải phóng những gánh lo:** Ưu tiên dọn sạch các khoản nợ lãi cao để đầu óc thảnh thơi sáng tạo bạn nhé.\n" \
+                           f"3. **Tích lũy tự động nhẹ nhàng:** Trích ra một phần nhỏ thu nhập mỗi tháng (ví dụ 10%) cất đi ngay khi nhận lương. Xem như trả công cho bản thân tương lai!\n" \
+                           f"4. **Hãy yêu thương và nuông chiều bản thân:** Luôn dành ra một phần ngân sách nhỏ để làm những việc mình thích. Cuộc sống cần có niềm vui và sự thoải mái mới trọn vẹn chứ, đúng không nào! 🤗\n\n" \
+                           f"👉 *Mẹo nhỏ:* Hãy gõ **'chi tiêu'**, **'ngân sách'** hoặc **'tiết kiệm'** bất cứ lúc nào để xem phân tích tài chính cá nhân của riêng bạn nhé!"
             else:
-                response = f"### 🧠 AI Financial Advisor Consultation\n\n" \
-                           f"Thank you for your question: *\"{message}\"*\n\n" \
-                           f"As your personal financial advisor, here are the key pillars to build your wealth and financial freedom:\n\n" \
-                           f"1. **Emergency Fund First:** Keep 3 to 6 months of living expenses in a highly liquid account.\n" \
-                           f"2. **Pay Down High-Interest Debt:** Prioritize credit cards or high-interest loans before starting to invest.\n" \
-                           f"3. **Automate Your Savings:** Pay yourself first by routing 10-20% of your paycheck directly into savings or investments.\n" \
-                           f"4. **Live Below Your Means:** Review subscriptions regularly and control discretionary shopping.\n\n" \
-                           f"👉 *Tip:* You can ask me specific questions about your **'spent'**, **'budget'**, or **'savings'** to analyze your actual database records!"
+                response = f"### 🧠 Financial Heart-to-Heart with AI Companion\n\n" \
+                           f"Thank you for sharing your thoughts with me: *\"{message}\"*\n\n" \
+                           f"As your supportive friend and wealth companion, here are a few gentle pillars for your peace of mind:\n\n" \
+                           f"1. **Peace of Mind First:** Always keep a tiny savings pocket (your Peace Fund) of about 3 months of expenses. Knowing it's there gives you incredible security and comfort.\n" \
+                           f"2. **Clear the Heavy Baggage:** Prioritize paying down high-interest debts to set your mind free.\n" \
+                           f"3. **Automate Cozy Savings:** Pay yourself first by setting aside a small percentage (e.g. 10%) right away. Your future self will thank you!\n" \
+                           f"4. **Treat Yourself Kindly:** Never forget to budget a little for things that make you happy. You deserve joy and a comfortable journey! 🤗\n\n" \
+                           f"👉 *Note:* You can type **'spent'**, **'budget'**, or **'save'** at any time to inspect your custom statistics!"
 
         return jsonify({'response': response}), 200
         

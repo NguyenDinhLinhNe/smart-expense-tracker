@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { getTransactions, createTransaction, updateTransaction, deleteTransaction, getCategories, createCategory } from '../services/api';
-import { FaEdit, FaTrash, FaPlus, FaFilter, FaTimes, FaPlusCircle } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaPlus, FaFilter, FaTimes, FaPlusCircle, FaChevronDown, FaCalendarAlt } from 'react-icons/fa';
 import toast from 'react-hot-toast';
-
 
 const Transactions = () => {
   const [transactions, setTransactions] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  const [showCategoryModal, setShowCategoryModal] = useState(false); // State cho modal category
+  const [showCategoryModal, setShowCategoryModal] = useState(false); // State for category modal
   const [editingTransaction, setEditingTransaction] = useState(null);
   const [filters, setFilters] = useState({ type: '', category_id: '', start_date: '', end_date: '' });
   const [formData, setFormData] = useState({
@@ -20,7 +19,7 @@ const Transactions = () => {
     note: ''
   });
   
-  // State cho category mới
+  // State for new category
   const [newCategory, setNewCategory] = useState({
     name: '',
     icon: '📌',
@@ -41,7 +40,7 @@ const Transactions = () => {
       setTransactions(transRes.data.transactions);
       setCategories(catRes.data.categories);
     } catch (error) {
-      
+      // Fail silently or handle error
     } finally {
       setLoading(false);
     }
@@ -137,122 +136,164 @@ const Transactions = () => {
 
   const filteredCategories = categories.filter(c => c.type === formData.type);
 
-  // Danh sách icon gợi ý
+  // Suggested emojis
   const iconSuggestions = ['🍔', '🚗', '🛍️', '🎬', '💡', '🏥', '📚', '💰', '💻', '📈', '☕', '🍕', '🎮', '📱', '✈️', '🏠'];
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-white">Transactions</h2>
+    <div className="space-y-8 animate-fade-in font-body">
+      {/* Header Panel */}
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 bg-dark-glass border border-dark-border p-6 rounded-2xl relative overflow-hidden">
+        <div className="absolute w-24 h-24 bg-cyan-premium blur-[30px] -bottom-10 -left-10 opacity-[0.08] rounded-full pointer-events-none"></div>
+        <div>
+          <h2 className="text-xl font-extrabold text-white tracking-wide uppercase font-heading">
+            Transactions Ledger
+          </h2>
+          <p className="text-xs text-gray-500 mt-0.5">Filter, search, or add physical financial logs</p>
+        </div>
+        
         <button
           onClick={() => {
             resetForm();
             setShowModal(true);
           }}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+          className="self-start sm:self-center py-2.5 px-5 bg-gradient-to-r from-cyan-premium to-purple-premium text-white font-heading font-extrabold text-xs tracking-wide shadow-md shadow-cyan-premium/20 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-cyan-premium/40 active:translate-y-0 transition-all flex items-center gap-2 rounded-xl"
         >
-          <FaPlus /> Add Transaction
+          <FaPlus /> <span>ADD TRANSACTION</span>
         </button>
       </div>
 
-      {/* Filters */}
-      <div className="bg-gray-800 rounded-xl p-4">
-        <div className="flex items-center gap-2 mb-3">
-          <FaFilter className="text-gray-400" />
-          <span className="text-white font-medium">Filters</span>
+      {/* Advanced Filter Toolbar */}
+      <div className="relative overflow-hidden bg-dark-glass border border-dark-border rounded-2xl p-6 shadow-xl">
+        <div className="flex items-center gap-2 mb-5">
+          <div className="p-1.5 bg-cyan-premium/15 text-cyan-premium rounded-lg">
+            <FaFilter className="text-sm" />
+          </div>
+          <span className="text-white text-xs font-bold uppercase tracking-wider font-heading">
+            Filter Ledger Cashflows
+          </span>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-          <select
-            value={filters.type}
-            onChange={(e) => setFilters({ ...filters, type: e.target.value })}
-            className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white"
-          >
-            <option value="">All Types</option>
-            <option value="income">Income</option>
-            <option value="expense">Expense</option>
-          </select>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+          {/* Filter: Type */}
+          <div className="relative">
+            <select
+              value={filters.type}
+              onChange={(e) => setFilters({ ...filters, type: e.target.value })}
+              className="w-full appearance-none pl-4 pr-10 py-3 bg-[#0f172a]/80 border border-dark-border rounded-xl text-xs text-gray-300 outline-none focus:border-cyan-premium focus:shadow-cyan-glow transition-all"
+            >
+              <option value="">All Cashflow Types</option>
+              <option value="income">Income Only</option>
+              <option value="expense">Expenses Only</option>
+            </select>
+            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-500 text-xs">
+              <FaChevronDown />
+            </div>
+          </div>
           
-          <select
-            value={filters.category_id}
-            onChange={(e) => setFilters({ ...filters, category_id: e.target.value })}
-            className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white"
-          >
-            <option value="">All Categories</option>
-            {categories.map(cat => (
-              <option key={cat.id} value={cat.id}>{cat.icon} {cat.name}{(!cat.user_id) ? ' 🔒' : ''}</option>
-            ))}
-          </select>
+          {/* Filter: Category */}
+          <div className="relative">
+            <select
+              value={filters.category_id}
+              onChange={(e) => setFilters({ ...filters, category_id: e.target.value })}
+              className="w-full appearance-none pl-4 pr-10 py-3 bg-[#0f172a]/80 border border-dark-border rounded-xl text-xs text-gray-300 outline-none focus:border-cyan-premium focus:shadow-cyan-glow transition-all"
+            >
+              <option value="">All Categories</option>
+              {categories.map(cat => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.icon} {cat.name}{(!cat.user_id) ? ' 🔒' : ''}
+                </option>
+              ))}
+            </select>
+            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-500 text-xs">
+              <FaChevronDown />
+            </div>
+          </div>
           
-          <input
-            type="date"
-            value={filters.start_date}
-            onChange={(e) => setFilters({ ...filters, start_date: e.target.value })}
-            className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white"
-            placeholder="Start Date"
-          />
+          {/* Filter: Start Date */}
+          <div className="relative flex items-center">
+            <input
+              type="date"
+              value={filters.start_date}
+              onChange={(e) => setFilters({ ...filters, start_date: e.target.value })}
+              className="w-full pl-4 pr-4 py-3 bg-[#0f172a]/80 border border-dark-border rounded-xl text-xs text-gray-300 outline-none focus:border-cyan-premium focus:shadow-cyan-glow transition-all"
+              placeholder="Start Date"
+            />
+          </div>
           
-          <input
-            type="date"
-            value={filters.end_date}
-            onChange={(e) => setFilters({ ...filters, end_date: e.target.value })}
-            className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white"
-            placeholder="End Date"
-          />
+          {/* Filter: End Date */}
+          <div className="relative flex items-center">
+            <input
+              type="date"
+              value={filters.end_date}
+              onChange={(e) => setFilters({ ...filters, end_date: e.target.value })}
+              className="w-full pl-4 pr-4 py-3 bg-[#0f172a]/80 border border-dark-border rounded-xl text-xs text-gray-300 outline-none focus:border-cyan-premium focus:shadow-cyan-glow transition-all"
+              placeholder="End Date"
+            />
+          </div>
         </div>
       </div>
 
-      {/* Transactions Table */}
-      <div className="bg-gray-800 rounded-xl overflow-hidden">
+      {/* Ledger Table Container */}
+      <div className="bg-dark-glass border border-dark-border rounded-2xl overflow-hidden shadow-2xl relative">
+        <div className="absolute w-36 h-36 bg-purple-premium blur-[45px] -top-12 -right-12 opacity-[0.05] rounded-full pointer-events-none"></div>
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-700">
-              <tr>
-                <th className="px-6 py-3 text-left text-gray-300">Date</th>
-                <th className="px-6 py-3 text-left text-gray-300">Category</th>
-                <th className="px-6 py-3 text-left text-gray-300">Note</th>
-                <th className="px-6 py-3 text-right text-gray-300">Amount</th>
-                <th className="px-6 py-3 text-center text-gray-300">Actions</th>
+          <table className="w-full text-left border-collapse text-sm">
+            <thead>
+              <tr className="border-b border-dark-border text-gray-500">
+                <th className="py-4 px-6 bg-white/[0.01] font-semibold text-xs tracking-wider uppercase font-heading">Date</th>
+                <th className="py-4 px-6 bg-white/[0.01] font-semibold text-xs tracking-wider uppercase font-heading">Category</th>
+                <th className="py-4 px-6 bg-white/[0.01] font-semibold text-xs tracking-wider uppercase font-heading">Note</th>
+                <th className="py-4 px-6 bg-white/[0.01] font-semibold text-xs tracking-wider uppercase font-heading text-right">Amount</th>
+                <th className="py-4 px-6 bg-white/[0.01] font-semibold text-xs tracking-wider uppercase font-heading text-center w-[120px]">Actions</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-dark-border/40">
               {loading ? (
                 <tr>
-                  <td colSpan="5" className="text-center py-8 text-gray-400">Loading...</td>
+                  <td colSpan="5" className="text-center py-12">
+                    <div className="flex flex-col items-center justify-center gap-3">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-premium"></div>
+                      <span className="text-xs text-gray-500 tracking-wide uppercase font-semibold">Tuning databases...</span>
+                    </div>
+                  </td>
                 </tr>
               ) : transactions.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="text-center py-8 text-gray-400">No transactions found</td>
+                  <td colSpan="5" className="text-center py-12 text-gray-500 text-xs uppercase tracking-widest font-medium">
+                    No transactions found in this range.
+                  </td>
                 </tr>
               ) : (
                 transactions.map(transaction => (
-                  <tr key={transaction.id} className="border-b border-gray-700 hover:bg-gray-700/50">
-                    <td className="px-6 py-4 text-gray-300">{transaction.date}</td>
-                    <td className="px-6 py-4">
-                      <span className="flex items-center gap-2">
-                        <span>{transaction.category_icon}</span>
-                        <span className="text-gray-300">{transaction.category_name}</span>
+                  <tr key={transaction.id} className="hover:bg-white/[0.01] transition-colors duration-150">
+                    <td className="py-4 px-6 text-gray-400 font-mono text-xs">{transaction.date}</td>
+                    <td className="py-4 px-6">
+                      <span className="flex items-center gap-2.5">
+                        <span className="text-xl leading-none drop-shadow">{transaction.category_icon}</span>
+                        <span className="text-white font-medium text-xs">{transaction.category_name}</span>
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-gray-300">{transaction.note || '-'}</td>
-                    <td className={`px-6 py-4 text-right font-semibold ${
-                      transaction.type === 'income' ? 'text-green-400' : 'text-red-400'
+                    <td className="py-4 px-6 text-gray-400 max-w-[240px] truncate text-xs">{transaction.note || '-'}</td>
+                    <td className={`py-4 px-6 text-right font-bold tracking-tight text-xs ${
+                      transaction.type === 'income' ? 'text-emerald-premium' : 'text-rose-premium'
                     }`}>
                       {transaction.type === 'income' ? '+' : '-'}${Math.abs(transaction.amount).toFixed(2)}
                     </td>
-                    <td className="px-6 py-4 text-center">
-                      <div className="flex justify-center gap-2">
+                    <td className="py-4 px-6 text-center">
+                      <div className="flex justify-center items-center gap-3.5">
                         <button
                           onClick={() => handleEdit(transaction)}
-                          className="text-blue-400 hover:text-blue-300 transition-colors"
+                          className="text-cyan-premium hover:text-cyan-300 transition-colors p-1.5 hover:bg-cyan-premium/10 rounded-lg"
+                          title="Edit log"
                         >
-                          <FaEdit />
+                          <FaEdit className="text-sm" />
                         </button>
                         <button
                           onClick={() => handleDelete(transaction.id)}
-                          className="text-red-400 hover:text-red-300 transition-colors"
+                          className="text-rose-premium hover:text-rose-300 transition-colors p-1.5 hover:bg-rose-premium/10 rounded-lg"
+                          title="Delete log"
                         >
-                          <FaTrash />
+                          <FaTrash className="text-sm" />
                         </button>
                       </div>
                     </td>
@@ -266,104 +307,136 @@ const Transactions = () => {
 
       {/* Modal Add/Edit Transaction */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-800 rounded-xl max-w-md w-full p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-bold text-white">
-                {editingTransaction ? 'Edit Transaction' : 'Add Transaction'}
+        <div className="fixed inset-0 bg-[#090d16]/80 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-fade-in">
+          <div className="bg-[#101622]/95 border border-dark-border rounded-3xl max-w-md w-full p-8 shadow-2xl relative animate-modal-scale">
+            <div className="absolute w-24 h-24 bg-cyan-premium blur-[30px] -top-10 -left-10 opacity-[0.08] rounded-full pointer-events-none"></div>
+            
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-base font-extrabold text-white tracking-wide uppercase font-heading">
+                {editingTransaction ? 'Edit Log Entry' : 'Create New Log'}
               </h3>
-              <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-white">
-                <FaTimes />
+              <button 
+                onClick={() => setShowModal(false)} 
+                className="p-1.5 bg-white/[0.03] border border-dark-border rounded-lg text-gray-400 hover:text-white transition-colors"
+              >
+                <FaTimes size={12} />
               </button>
             </div>
             
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <label className="block text-gray-300 mb-2">Amount</label>
+                <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">
+                  Amount ($)
+                </label>
                 <input
                   type="number"
                   step="0.01"
                   value={formData.amount}
                   onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                  className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white"
+                  className="w-full px-4 py-3 bg-[#0f172a]/80 border border-dark-border rounded-xl text-xs text-white placeholder-gray-600 outline-none focus:border-cyan-premium focus:shadow-cyan-glow transition-all"
+                  placeholder="0.00"
                   required
                 />
               </div>
               
-              <div>
-                <label className="block text-gray-300 mb-2">Type</label>
-                <select
-                  value={formData.type}
-                  onChange={(e) => setFormData({ ...formData, type: e.target.value, category_id: '' })}
-                  className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white"
-                >
-                  <option value="expense">Expense</option>
-                  <option value="income">Income</option>
-                </select>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">
+                    Type
+                  </label>
+                  <div className="relative">
+                    <select
+                      value={formData.type}
+                      onChange={(e) => setFormData({ ...formData, type: e.target.value, category_id: '' })}
+                      className="w-full appearance-none pl-4 pr-10 py-3 bg-[#0f172a]/80 border border-dark-border rounded-xl text-xs text-white outline-none focus:border-cyan-premium focus:shadow-cyan-glow transition-all"
+                    >
+                      <option value="expense">Expense</option>
+                      <option value="income">Income</option>
+                    </select>
+                    <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-500 text-xs">
+                      <FaChevronDown />
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">
+                    Date
+                  </label>
+                  <input
+                    type="date"
+                    value={formData.date}
+                    onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                    className="w-full px-4 py-3 bg-[#0f172a]/80 border border-dark-border rounded-xl text-xs text-white outline-none focus:border-cyan-premium focus:shadow-cyan-glow transition-all font-mono"
+                    required
+                  />
+                </div>
               </div>
               
               <div>
-                <label className="block text-gray-300 mb-2">Category</label>
-                <div className="flex gap-2">
-                  <select
-                    value={formData.category_id}
-                    onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
-                    className="flex-1 bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white"
-                    required
-                  >
-                    <option value="">Select Category</option>
-                    {filteredCategories.map(cat => (
-                      <option key={cat.id} value={cat.id}>{cat.icon} {cat.name}{(!cat.user_id) ? ' 🔒' : ''}</option>
-                    ))}
-                  </select>
+                <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">
+                  Category
+                </label>
+                <div className="flex gap-2.5">
+                  <div className="relative flex-1">
+                    <select
+                      value={formData.category_id}
+                      onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
+                      className="w-full appearance-none pl-4 pr-10 py-3 bg-[#0f172a]/80 border border-dark-border rounded-xl text-xs text-white outline-none focus:border-cyan-premium focus:shadow-cyan-glow transition-all"
+                      required
+                    >
+                      <option value="">Select Category</option>
+                      {filteredCategories.map(cat => (
+                        <option key={cat.id} value={cat.id}>
+                          {cat.icon} {cat.name}{(!cat.user_id) ? ' 🔒' : ''}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-500 text-xs">
+                      <FaChevronDown />
+                    </div>
+                  </div>
+
                   <button
                     type="button"
                     onClick={() => {
                       setNewCategory({ ...newCategory, type: formData.type });
                       setShowCategoryModal(true);
                     }}
-                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors"
-                    title="Add new category"
+                    className="px-4 bg-teal-premium/15 hover:bg-teal-premium/25 border border-teal-premium/30 hover:border-teal-premium/60 text-teal-premium rounded-xl transition-all active:scale-95 flex items-center justify-center"
+                    title="Add custom category"
                   >
-                    <FaPlusCircle />
+                    <FaPlusCircle className="text-base" />
                   </button>
                 </div>
               </div>
               
               <div>
-                <label className="block text-gray-300 mb-2">Date</label>
-                <input
-                  type="date"
-                  value={formData.date}
-                  onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                  className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white"
-                  required
-                />
-              </div>
-              
-              <div>
-                <label className="block text-gray-300 mb-2">Note (Optional)</label>
+                <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">
+                  Note (Optional)
+                </label>
                 <textarea
                   value={formData.note}
                   onChange={(e) => setFormData({ ...formData, note: e.target.value })}
-                  className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white"
+                  className="w-full px-4 py-3 bg-[#0f172a]/80 border border-dark-border rounded-xl text-xs text-white placeholder-gray-600 outline-none focus:border-cyan-premium focus:shadow-cyan-glow transition-all"
                   rows="3"
+                  placeholder="Add descriptions..."
                 />
               </div>
               
-              <div className="flex gap-3 pt-4">
+              <div className="flex gap-3.5 pt-4">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-2 rounded-lg transition-colors"
+                  className="flex-1 py-3 bg-white/[0.02] border border-dark-border rounded-xl text-xs text-gray-400 hover:text-white font-heading font-extrabold transition-all"
                 >
-                  Cancel
+                  CANCEL
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg transition-colors"
+                  className="flex-1 py-3 bg-gradient-to-r from-cyan-premium to-purple-premium text-white font-heading font-extrabold text-xs tracking-wider rounded-xl transition-all shadow-md shadow-cyan-premium/10 hover:shadow-cyan-premium/30"
                 >
-                  {editingTransaction ? 'Update' : 'Create'}
+                  {editingTransaction ? 'UPDATE LOG' : 'CREATE LOG'}
                 </button>
               </div>
             </form>
@@ -371,93 +444,107 @@ const Transactions = () => {
         </div>
       )}
 
-      {/* Modal nhỏ để tạo Category mới */}
+      {/* Modal create Category */}
       {showCategoryModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-800 rounded-xl max-w-md w-full p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-bold text-white">Create New Category</h3>
+        <div className="fixed inset-0 bg-[#090d16]/90 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-fade-in">
+          <div className="bg-[#101622]/95 border border-dark-border rounded-3xl max-w-md w-full p-8 shadow-2xl relative animate-modal-scale">
+            <div className="absolute w-24 h-24 bg-teal-premium blur-[30px] -top-10 -left-10 opacity-[0.08] rounded-full pointer-events-none"></div>
+
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-base font-extrabold text-white tracking-wide uppercase font-heading">
+                Create New Category
+              </h3>
               <button 
                 onClick={() => {
                   setShowCategoryModal(false);
                   setNewCategory({ name: '', icon: '📌', type: formData.type });
                 }} 
-                className="text-gray-400 hover:text-white"
+                className="p-1.5 bg-white/[0.03] border border-dark-border rounded-lg text-gray-400 hover:text-white transition-colors"
               >
-                <FaTimes />
+                <FaTimes size={12} />
               </button>
             </div>
             
-            <form onSubmit={handleCreateCategory}>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-gray-300 mb-2">Category Name</label>
-                  <input
-                    type="text"
-                    value={newCategory.name}
-                    onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
-                    className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white"
-                    placeholder="e.g., Coffee, Shopping, Gym..."
-                    autoFocus
-                    required
-                  />
+            <form onSubmit={handleCreateCategory} className="space-y-5">
+              <div>
+                <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">
+                  Category Name
+                </label>
+                <input
+                  type="text"
+                  value={newCategory.name}
+                  onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
+                  className="w-full px-4 py-3 bg-[#0f172a]/80 border border-dark-border rounded-xl text-xs text-white placeholder-gray-500 outline-none focus:border-cyan-premium focus:shadow-cyan-glow transition-all"
+                  placeholder="e.g., Coffee, Shopping, Gym..."
+                  autoFocus
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">
+                  Quick Select Icon
+                </label>
+                <div className="flex flex-wrap gap-2.5 p-3 bg-white/[0.01] border border-dark-border rounded-2xl justify-center">
+                  {iconSuggestions.map(icon => (
+                    <button
+                      key={icon}
+                      type="button"
+                      onClick={() => setNewCategory({ ...newCategory, icon })}
+                      className={`text-xl p-2 rounded-xl transition-all duration-150 active:scale-90 ${
+                        newCategory.icon === icon ? 'bg-cyan-premium/20 border border-cyan-premium scale-110 shadow-cyan-premium/25 shadow-md' : 'bg-white/[0.02] border border-dark-border hover:bg-white/[0.05]'
+                      }`}
+                    >
+                      {icon}
+                    </button>
+                  ))}
                 </div>
                 
-                <div>
-                  <label className="block text-gray-300 mb-2">Icon (Emoji)</label>
-                  <div className="flex flex-wrap gap-2 mb-2">
-                    {iconSuggestions.map(icon => (
-                      <button
-                        key={icon}
-                        type="button"
-                        onClick={() => setNewCategory({ ...newCategory, icon })}
-                        className={`text-2xl p-2 rounded-lg transition-all ${
-                          newCategory.icon === icon ? 'bg-blue-600 scale-110' : 'bg-gray-700 hover:bg-gray-600'
-                        }`}
-                      >
-                        {icon}
-                      </button>
-                    ))}
-                  </div>
-                  <input
-                    type="text"
-                    value={newCategory.icon}
-                    onChange={(e) => setNewCategory({ ...newCategory, icon: e.target.value })}
-                    className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white mt-2"
-                    placeholder="Or enter custom emoji"
-                    maxLength="2"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-gray-300 mb-2">Type</label>
+                <input
+                  type="text"
+                  value={newCategory.icon}
+                  onChange={(e) => setNewCategory({ ...newCategory, icon: e.target.value })}
+                  className="w-full px-4 py-3 bg-[#0f172a]/80 border border-dark-border rounded-xl text-xs text-white placeholder-gray-600 outline-none focus:border-cyan-premium focus:shadow-cyan-glow transition-all mt-3 font-mono text-center text-lg"
+                  placeholder="Or enter custom emoji..."
+                  maxLength="2"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">
+                  Cashflow Association
+                </label>
+                <div className="relative">
                   <select
                     value={newCategory.type}
                     onChange={(e) => setNewCategory({ ...newCategory, type: e.target.value })}
-                    className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white"
+                    className="w-full appearance-none pl-4 pr-10 py-3 bg-[#0f172a]/80 border border-dark-border rounded-xl text-xs text-white outline-none focus:border-cyan-premium focus:shadow-cyan-glow transition-all"
                   >
-                    <option value="expense">Expense</option>
-                    <option value="income">Income</option>
+                    <option value="expense">Expense Category</option>
+                    <option value="income">Income Category</option>
                   </select>
+                  <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-500 text-xs">
+                    <FaChevronDown />
+                  </div>
                 </div>
               </div>
               
-              <div className="flex gap-3 pt-6">
+              <div className="flex gap-3.5 pt-4">
                 <button
                   type="button"
                   onClick={() => {
                     setShowCategoryModal(false);
                     setNewCategory({ name: '', icon: '📌', type: formData.type });
                   }}
-                  className="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-2 rounded-lg transition-colors"
+                  className="flex-1 py-3 bg-white/[0.02] border border-dark-border rounded-xl text-xs text-gray-400 hover:text-white font-heading font-extrabold transition-all"
                 >
-                  Cancel
+                  CANCEL
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg transition-colors"
+                  className="flex-1 py-3 bg-gradient-to-r from-teal-premium to-cyan-premium text-white font-heading font-extrabold text-xs tracking-wider rounded-xl transition-all shadow-md shadow-teal-premium/10 hover:shadow-teal-premium/30"
                 >
-                  Create Category
+                  CREATE CATEGORY
                 </button>
               </div>
             </form>

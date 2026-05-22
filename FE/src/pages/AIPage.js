@@ -8,7 +8,9 @@ import {
   FaPaperPlane, 
   FaRobot, 
   FaUser, 
-  FaCommentDots 
+  FaCommentDots,
+  FaChevronRight,
+  FaDatabase
 } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 
@@ -31,6 +33,17 @@ const AIPage = () => {
   const [inputVal, setInputVal] = useState('');
   const [sending, setSending] = useState(false);
   const chatEndRef = useRef(null);
+  const inputRef = useRef(null);
+
+  // Auto focus input when chat tab is active or sending state completes
+  useEffect(() => {
+    if (!sending && activeTab === 'chat' && inputRef.current) {
+      const timer = setTimeout(() => {
+        if (inputRef.current) inputRef.current.focus();
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [sending, activeTab]);
 
   useEffect(() => {
     fetchAIData();
@@ -86,11 +99,10 @@ const AIPage = () => {
       };
       setMessages(prev => [...prev, aiMsg]);
     } catch (error) {
-      toast.error("AI Assistant is offline");
       const errorMsg = {
         id: Date.now() + 1,
         sender: 'ai',
-        text: "🚨 *Lỗi:* Không thể kết nối với Trợ lý AI. Vui lòng đảm bảo Flask server đang chạy.",
+        text: "Tôi đang gặp khó khăn khi kết nối với máy chủ phân tích tài chính. Vui lòng kiểm tra lại dịch vụ hệ thống của bạn nhé! 🤖💼",
         timestamp: new Date()
       };
       setMessages(prev => [...prev, errorMsg]);
@@ -98,8 +110,6 @@ const AIPage = () => {
       setSending(false);
     }
   };
-
-
 
   // Simple custom inline style parser for bullet points, bold and inline code
   const parseInlineStyle = (text) => {
@@ -111,7 +121,7 @@ const AIPage = () => {
         return <strong key={idx} className="font-bold text-white">{part.slice(2, -2)}</strong>;
       }
       if (part.startsWith('`') && part.endsWith('`')) {
-        return <code key={idx} className="bg-gray-900 text-pink-400 px-1.5 py-0.5 rounded text-sm font-mono">{part.slice(1, -1)}</code>;
+        return <code key={idx} className="bg-[#090d16] text-[#06b6d4] px-1.5 py-0.5 rounded text-xs font-mono">{part.slice(1, -1)}</code>;
       }
       return part;
     });
@@ -124,15 +134,15 @@ const AIPage = () => {
     return lines.map((line, index) => {
       let content = line;
       if (content.startsWith('### ')) {
-        return <h4 key={index} className="text-lg font-bold text-purple-300 mt-4 mb-2 border-b border-gray-700/50 pb-1">{content.replace('### ', '')}</h4>;
+        return <h4 key={index} className="text-sm font-extrabold text-cyan-premium mt-4 mb-2 border-b border-dark-border pb-1 font-heading uppercase tracking-wide">{content.replace('### ', '')}</h4>;
       }
       if (content.startsWith('## ')) {
-        return <h3 key={index} className="text-xl font-bold text-purple-400 mt-4 mb-2">{content.replace('## ', '')}</h3>;
+        return <h3 key={index} className="text-base font-extrabold text-purple-premium mt-4 mb-2 font-heading uppercase tracking-wide">{content.replace('## ', '')}</h3>;
       }
       if (content.startsWith('* ') || content.startsWith('- ')) {
         const cleanText = content.replace(/^[\*\-]\s+/, '');
         return (
-          <li key={index} className="ml-4 list-disc text-gray-300 my-1">
+          <li key={index} className="ml-4 list-disc text-gray-300 my-1 text-xs">
             {parseInlineStyle(cleanText)}
           </li>
         );
@@ -140,7 +150,7 @@ const AIPage = () => {
       if (content.trim() === '') {
         return <div key={index} className="h-2"></div>;
       }
-      return <p key={index} className="text-gray-300 my-1 leading-relaxed">{parseInlineStyle(content)}</p>;
+      return <p key={index} className="text-gray-300 my-1 leading-relaxed text-xs">{parseInlineStyle(content)}</p>;
     });
   };
 
@@ -155,154 +165,169 @@ const AIPage = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      <div className="flex flex-col items-center justify-center py-20 gap-3 font-body">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-cyan-premium"></div>
+        <span className="text-xs text-gray-500 tracking-wide uppercase font-semibold">Tuning neural predictions...</span>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 animate-fade-in font-body">
       {/* Dynamic Cosmic Header */}
-      <div className="bg-gradient-to-r from-purple-800 via-indigo-900 to-blue-900 rounded-2xl p-6 text-white shadow-xl border border-purple-500/20 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl -ml-16 -mb-16 pointer-events-none"></div>
-        <div className="flex items-center gap-4 relative z-10">
-          <div className="p-3 bg-purple-600/30 rounded-xl border border-purple-400/20">
-            <FaBrain className="text-3xl text-purple-300 animate-pulse" />
+      <div className="bg-dark-glass border border-dark-border p-6 rounded-2xl relative overflow-hidden group hover:border-white/10 transition-all duration-300 shadow-xl">
+        <div className="absolute w-36 h-36 bg-cyan-premium blur-[45px] -top-12 -right-12 opacity-[0.08] rounded-full pointer-events-none"></div>
+        <div className="absolute w-36 h-36 bg-purple-premium blur-[45px] -bottom-12 -left-12 opacity-[0.05] rounded-full pointer-events-none"></div>
+        
+        <div className="flex items-center gap-4.5 relative z-10">
+          <div className="w-[50px] h-[50px] rounded-xl bg-gradient-to-br from-cyan-premium to-purple-premium flex items-center justify-center text-white text-xl shadow-lg shadow-cyan-premium/25 animate-pulse">
+            <FaBrain className="text-2xl" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold tracking-wide">AI Financial Copilot</h2>
-            <p className="text-purple-200 mt-1">Smart advisor and real-time automated forecasting</p>
+            <h2 className="text-xl font-extrabold text-white tracking-wide uppercase font-heading">AI Financial Copilot</h2>
+            <p className="text-xs text-gray-500 mt-0.5">Smart advisor and real-time automated cashflow forecasting</p>
           </div>
         </div>
       </div>
 
       {/* Tabs Menu */}
-      <div className="flex gap-4 border-b border-gray-700/60 pb-px mb-4">
+      <div className="flex gap-6 border-b border-dark-border/40 pb-px">
         <button
           onClick={() => setActiveTab('insights')}
-          className={`pb-3 px-4 font-semibold transition-all duration-300 relative ${
+          className={`pb-3.5 px-4 text-xs uppercase font-extrabold tracking-wider font-heading transition-all duration-300 relative ${
             activeTab === 'insights' 
-              ? 'text-white' 
-              : 'text-gray-400 hover:text-white'
+              ? 'text-cyan-premium' 
+              : 'text-gray-500 hover:text-gray-300'
           }`}
         >
           <span className="flex items-center gap-2">
-            <FaChartLine />
+            <FaChartLine className="text-sm" />
             AI Dashboard & Insights
           </span>
           {activeTab === 'insights' && (
-            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"></div>
+            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-cyan-premium to-teal-premium rounded-full"></div>
           )}
         </button>
+        
         <button
           onClick={() => setActiveTab('chat')}
-          className={`pb-3 px-4 font-semibold transition-all duration-300 relative ${
+          className={`pb-3.5 px-4 text-xs uppercase font-extrabold tracking-wider font-heading transition-all duration-300 relative ${
             activeTab === 'chat' 
-              ? 'text-white' 
-              : 'text-gray-400 hover:text-white'
+              ? 'text-cyan-premium' 
+              : 'text-gray-500 hover:text-gray-300'
           }`}
         >
           <span className="flex items-center gap-2">
-            <FaCommentDots />
+            <FaCommentDots className="text-sm" />
             Talk to AI Advisor
           </span>
           {activeTab === 'chat' && (
-            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"></div>
+            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-cyan-premium to-purple-premium rounded-full"></div>
           )}
         </button>
       </div>
 
       {/* Tab Content 1: Dashboard Insights */}
       {activeTab === 'insights' && predictions && (
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-8 animate-fade-in">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Predictions Card */}
-            <div className="bg-gray-800/80 backdrop-blur-md rounded-2xl p-6 shadow-lg border border-gray-700/50 hover:border-gray-600/50 transition-colors">
-              <div className="flex items-center gap-2 mb-4">
-                <FaChartLine className="text-blue-400 text-xl" />
-                <h3 className="text-xl font-bold text-white">Next Month Prediction</h3>
+            <div className="relative overflow-hidden bg-dark-glass border border-dark-border rounded-2xl p-6 shadow-xl hover:-translate-y-1 hover:border-white/10 transition-all duration-300 group">
+              <div className="absolute w-32 h-32 bg-cyan-premium blur-[35px] -top-12 -right-12 opacity-[0.05] rounded-full pointer-events-none group-hover:opacity-10 transition-opacity"></div>
+              <div className="flex items-center gap-2.5 mb-5 border-b border-dark-border/40 pb-3">
+                <FaChartLine className="text-cyan-premium text-base" />
+                <h3 className="text-base font-extrabold text-white tracking-wide uppercase font-heading">Next Month Prediction</h3>
               </div>
-              <div className="space-y-4">
+              
+              <div className="space-y-5">
                 <div>
-                  <p className="text-gray-400 text-sm">Predicted Expense</p>
-                  <p className="text-3xl font-bold text-white">${(predictions.predicted_expense ?? 0).toFixed(2)}</p>
-                  <p className={`text-sm mt-1 ${
-                    (predictions.change_percentage ?? 0) > 0 ? 'text-red-400' : 'text-green-400'
+                  <p className="text-gray-500 text-[10px] uppercase font-bold tracking-wider">PREDICTED OUTFLOW</p>
+                  <p className="text-3xl font-extrabold text-white mt-1.5 font-heading tracking-tight font-mono">${(predictions.predicted_expense ?? 0).toFixed(2)}</p>
+                  <p className={`text-xs font-semibold mt-2.5 flex items-center gap-1 ${
+                    (predictions.change_percentage ?? 0) > 0 ? 'text-rose-premium' : 'text-emerald-premium'
                   }`}>
-                    {(predictions.change_percentage ?? 0) > 0 ? '↑' : '↓'} 
-                    {Math.abs(predictions.change_percentage ?? 0).toFixed(1)}% from this month
+                    <span>{(predictions.change_percentage ?? 0) > 0 ? '▲ Increase of' : '▼ Reduction of'}</span>
+                    <span className="font-mono">{Math.abs(predictions.change_percentage ?? 0).toFixed(1)}%</span>
+                    <span className="text-gray-500 font-normal">from current period</span>
                   </p>
                 </div>
-                <div>
-                  <p className="text-gray-400 text-sm">Top predicted category</p>
-                  <p className="text-lg font-semibold text-white">
-                    {predictions.top_category || 'None'} - ${(predictions.top_category_amount ?? 0).toFixed(2)}
+                
+                <div className="border-t border-dark-border/40 pt-4">
+                  <p className="text-gray-500 text-[10px] uppercase font-bold tracking-wider">PROJECTED INTENSITY PEAK</p>
+                  <p className="text-sm font-bold text-white mt-1">
+                    {predictions.top_category || 'None'} <span className="font-mono text-cyan-premium text-xs ml-1.5">${(predictions.top_category_amount ?? 0).toFixed(2)}</span>
                   </p>
                 </div>
               </div>
             </div>
 
             {/* Recommendations Card */}
-            <div className="bg-gray-800/80 backdrop-blur-md rounded-2xl p-6 shadow-lg border border-gray-700/50 hover:border-gray-600/50 transition-colors">
-              <div className="flex items-center gap-2 mb-4">
-                <FaLightbulb className="text-yellow-400 text-xl" />
-                <h3 className="text-xl font-bold text-white">Smart Recommendations</h3>
+            <div className="relative overflow-hidden bg-dark-glass border border-dark-border rounded-2xl p-6 shadow-xl hover:-translate-y-1 hover:border-white/10 transition-all duration-300 group">
+              <div className="absolute w-32 h-32 bg-purple-premium blur-[35px] -top-12 -right-12 opacity-[0.05] rounded-full pointer-events-none group-hover:opacity-10 transition-opacity"></div>
+              <div className="flex items-center gap-2.5 mb-5 border-b border-dark-border/40 pb-3">
+                <FaLightbulb className="text-purple-premium text-base" />
+                <h3 className="text-base font-extrabold text-white tracking-wide uppercase font-heading">Smart Recommendations</h3>
               </div>
-              <div className="space-y-3 max-h-48 overflow-y-auto pr-1 custom-scrollbar">
+              
+              <div className="space-y-4 max-h-[195px] overflow-y-auto pr-1">
                 {recommendations.map((rec, index) => (
-                  <div key={index} className="p-3 bg-gray-700/40 rounded-xl border border-gray-700/30">
-                    <p className="text-gray-200 text-sm">{rec.message}</p>
-                    <p className="text-xs text-purple-300 mt-1.5 font-medium">Potential savings: ${rec.potential_savings}/month</p>
+                  <div key={index} className="p-3.5 bg-white/[0.01] border border-dark-border rounded-xl hover:bg-white/[0.03] transition-colors">
+                    <p className="text-gray-300 text-xs leading-relaxed">{rec.message}</p>
+                    <p className="text-[10px] text-cyan-premium mt-2 font-bold uppercase tracking-wider">Potential savings: <span className="font-mono">${rec.potential_savings}</span> / month</p>
                   </div>
                 ))}
                 {recommendations.length === 0 && (
-                  <p className="text-gray-400 text-sm italic">No active recommendations for now.</p>
+                  <p className="text-gray-500 text-xs italic py-4 text-center">No active optimization parameters found.</p>
                 )}
               </div>
             </div>
           </div>
 
           {/* Spending Alerts */}
-          <div className="bg-gray-800/80 backdrop-blur-md rounded-2xl p-6 shadow-lg border border-gray-700/50">
-            <div className="flex items-center gap-2 mb-4">
-              <FaExclamationTriangle className="text-orange-400 text-xl" />
-              <h3 className="text-xl font-bold text-white">Spending Alerts</h3>
+          <div className="bg-dark-glass border border-dark-border rounded-2xl p-6 shadow-xl relative overflow-hidden">
+            <div className="absolute w-36 h-36 bg-amber-premium blur-[45px] -top-12 -right-12 opacity-[0.03] rounded-full pointer-events-none"></div>
+            <div className="flex items-center gap-2.5 mb-5 border-b border-dark-border/40 pb-3">
+              <FaExclamationTriangle className="text-amber-premium text-base" />
+              <h3 className="text-base font-extrabold text-white tracking-wide uppercase font-heading">Spending Alerts</h3>
             </div>
-            <div className="space-y-3">
+            
+            <div className="space-y-3.5">
               {predictions?.alerts?.map((alert, index) => (
-                <div key={index} className="p-4 bg-orange-950/20 border border-orange-500/20 rounded-xl">
-                  <p className="text-orange-300 text-sm leading-relaxed">{alert}</p>
+                <div key={index} className="p-4 bg-amber-premium/5 border border-amber-premium/15 rounded-xl">
+                  <p className="text-amber-300 text-xs leading-relaxed">{alert}</p>
                 </div>
               ))}
               {(!predictions?.alerts || predictions.alerts.length === 0) && (
-                <p className="text-gray-400 text-sm italic">You have no budgeting alerts this month! Great job!</p>
+                <p className="text-gray-500 text-xs italic py-2 text-center uppercase tracking-widest font-medium">All financial limits healthy. Excellent asset governance!</p>
               )}
             </div>
           </div>
 
           {/* Monthly Comparison */}
-          <div className="bg-gray-800/80 backdrop-blur-md rounded-2xl p-6 shadow-lg border border-gray-700/50">
-            <h3 className="text-xl font-bold text-white mb-4">Monthly Spending Analysis</h3>
+          <div className="bg-dark-glass border border-dark-border rounded-2xl overflow-hidden shadow-2xl relative">
+            <div className="absolute w-36 h-36 bg-purple-premium blur-[45px] -top-12 -right-12 opacity-[0.03] rounded-full pointer-events-none"></div>
+            <div className="p-6 border-b border-dark-border/40">
+              <h3 className="text-base font-bold text-white tracking-wide font-heading uppercase">Monthly Category Variance Comparison</h3>
+            </div>
+            
             <div className="overflow-x-auto">
-              <table className="w-full">
+              <table className="w-full text-left border-collapse text-sm">
                 <thead>
-                  <tr className="border-b border-gray-700/50">
-                    <th className="text-left py-3 text-gray-400 text-sm">Category</th>
-                    <th className="text-right py-3 text-gray-400 text-sm">This Month</th>
-                    <th className="text-right py-3 text-gray-400 text-sm">Last Month</th>
-                    <th className="text-right py-3 text-gray-400 text-sm">Change</th>
+                  <tr className="border-b border-dark-border text-gray-500">
+                    <th className="py-4 px-6 bg-white/[0.01] font-semibold text-xs tracking-wider uppercase font-heading">Category</th>
+                    <th className="py-4 px-6 bg-white/[0.01] font-semibold text-xs tracking-wider uppercase font-heading text-right">This Period</th>
+                    <th className="py-4 px-6 bg-white/[0.01] font-semibold text-xs tracking-wider uppercase font-heading text-right">Last Period</th>
+                    <th className="py-4 px-6 bg-white/[0.01] font-semibold text-xs tracking-wider uppercase font-heading text-right w-[140px]">Change Variance</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-dark-border/40">
                   {predictions?.category_comparison?.map((cat, index) => (
-                    <tr key={index} className="border-b border-gray-700/30 hover:bg-gray-700/10 transition-colors">
-                      <td className="py-3.5 text-gray-300 text-sm font-medium">{cat.name}</td>
-                      <td className="py-3.5 text-right text-gray-300 text-sm">${(cat.current ?? 0).toFixed(2)}</td>
-                      <td className="py-3.5 text-right text-gray-300 text-sm">${(cat.previous ?? 0).toFixed(2)}</td>
-                      <td className={`py-3.5 text-right text-sm font-bold ${
-                        (cat.change ?? 0) > 0 ? 'text-red-400' : 'text-green-400'
+                    <tr key={index} className="hover:bg-white/[0.01] transition-colors duration-150">
+                      <td className="py-4 px-6 text-white font-medium text-xs">{cat.name}</td>
+                      <td className="py-4 px-6 text-right font-bold text-xs font-mono text-gray-300">${(cat.current ?? 0).toFixed(2)}</td>
+                      <td className="py-4 px-6 text-right font-bold text-xs font-mono text-gray-400">${(cat.previous ?? 0).toFixed(2)}</td>
+                      <td className={`py-4 px-6 text-right font-bold text-xs font-mono ${
+                        (cat.change ?? 0) > 0 ? 'text-rose-premium' : 'text-emerald-premium'
                       }`}>
                         {(cat.change ?? 0) > 0 ? '+' : ''}{(cat.change ?? 0).toFixed(1)}%
                       </td>
@@ -310,7 +335,7 @@ const AIPage = () => {
                   ))}
                   {(!predictions?.category_comparison || predictions.category_comparison.length === 0) && (
                     <tr>
-                      <td colSpan="4" className="py-6 text-center text-gray-500 italic text-sm">No transaction categories logged for comparison.</td>
+                      <td colSpan="4" className="py-8 text-center text-gray-500 italic text-xs uppercase tracking-widest font-medium">No comparisons logged yet.</td>
                     </tr>
                   )}
                 </tbody>
@@ -322,69 +347,74 @@ const AIPage = () => {
 
       {/* Tab Content 2: Interactive AI Chatbot */}
       {activeTab === 'chat' && (
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-[550px] relative">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-[560px] relative font-body">
           
           {/* Quick Suggestions Panel */}
-          <div className="lg:col-span-1 bg-gray-800/80 backdrop-blur-md rounded-2xl p-5 border border-gray-700/50 flex flex-col justify-between shadow-lg">
+          <div className="lg:col-span-1 bg-dark-glass border border-dark-border rounded-2xl p-5 flex flex-col justify-between shadow-xl relative overflow-hidden">
+            <div className="absolute w-24 h-24 bg-cyan-premium blur-[30px] -bottom-10 -left-10 opacity-[0.05] rounded-full pointer-events-none"></div>
             <div>
-              <h4 className="text-white font-bold text-md mb-3 pb-2 border-b border-gray-700/50 flex items-center gap-1.5">
-                <FaLightbulb className="text-yellow-400" />
-                Quick Suggestions
-              </h4>
-              <p className="text-xs text-gray-400 mb-4">Click any option below to ask the AI financial assistant immediately:</p>
+              <div className="flex items-center gap-2 mb-4 border-b border-dark-border/40 pb-3">
+                <FaLightbulb className="text-amber-premium text-sm animate-pulse" />
+                <span className="text-white text-xs font-bold uppercase tracking-wider font-heading">
+                  Quick Suggestions
+                </span>
+              </div>
+              
               <div className="space-y-2.5">
                 {suggestions.map((s, index) => (
                   <button
                     key={index}
                     onClick={() => handleSendMessage(s.query)}
                     disabled={sending}
-                    className="w-full text-left py-2.5 px-3 bg-gray-700/30 hover:bg-purple-600/20 hover:border-purple-500/40 border border-gray-700/50 rounded-xl text-gray-300 hover:text-purple-300 text-xs font-semibold tracking-wide transition-all duration-300"
+                    className="w-full text-left py-3 px-3.5 bg-white/[0.01] hover:bg-cyan-premium/10 border border-dark-border hover:border-cyan-premium rounded-xl text-gray-400 hover:text-cyan-premium text-xs font-semibold tracking-wide transition-all duration-200 active:scale-95 flex items-center justify-between"
                   >
-                    {s.label}
+                    <span>{s.label}</span>
+                    <FaChevronRight className="text-[9px] opacity-40" />
                   </button>
                 ))}
               </div>
             </div>
             
-            <div className="mt-4 p-3 bg-purple-950/20 border border-purple-500/20 rounded-xl text-[10px] text-purple-300/80 leading-relaxed">
-              🤖 <strong>AI Copilot</strong> analyses your live transactions, global limits and budgets instantly to output maximum precision.
+            <div className="mt-4 p-3 bg-purple-premium/5 border border-purple-premium/15 rounded-xl text-[10px] text-purple-300 leading-relaxed font-semibold">
+              🤖 CO-PILOT: Asks directly analyze your financial databases in real time to present recommendations.
             </div>
           </div>
 
           {/* Main Chat Interface */}
-          <div className="lg:col-span-3 bg-gray-800/80 backdrop-blur-md rounded-2xl border border-gray-700/50 flex flex-col h-full overflow-hidden shadow-lg">
+          <div className="lg:col-span-3 bg-dark-glass border border-dark-border rounded-2xl flex flex-col h-full overflow-hidden shadow-2xl relative">
+            <div className="absolute w-36 h-36 bg-cyan-premium blur-[45px] -top-12 -right-12 opacity-[0.03] rounded-full pointer-events-none"></div>
             
             {/* Chat Body */}
-            <div className="flex-1 overflow-y-auto p-5 space-y-4 max-h-[460px] custom-scrollbar">
+            <div className="flex-1 overflow-y-auto p-6 space-y-4 max-h-[460px] custom-scrollbar bg-black/10">
               {messages.map(msg => (
                 <div 
                   key={msg.id} 
                   className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
-                  <div className={`flex items-start gap-2.5 max-w-[85%] ${msg.sender === 'user' ? 'flex-row-reverse' : ''}`}>
+                  <div className={`flex items-start gap-3 max-w-[85%] ${msg.sender === 'user' ? 'flex-row-reverse' : ''}`}>
                     {/* Avatar */}
-                    <div className={`p-2 rounded-xl border shrink-0 ${
+                    <div className={`p-2.5 rounded-xl shrink-0 border ${
                       msg.sender === 'user' 
-                        ? 'bg-blue-600/20 border-blue-500/30 text-blue-400' 
-                        : 'bg-purple-600/20 border-purple-500/30 text-purple-400'
+                        ? 'bg-cyan-premium/15 border-cyan-premium/25 text-cyan-premium' 
+                        : 'bg-purple-premium/15 border-purple-premium/25 text-purple-premium shadow-lg shadow-purple-premium/5'
                     }`}>
-                      {msg.sender === 'user' ? <FaUser className="text-sm" /> : <FaRobot className="text-sm" />}
+                      {msg.sender === 'user' ? <FaUser className="text-xs" /> : <FaRobot className="text-xs" />}
                     </div>
 
                     {/* Message Bubble */}
-                    <div className={`p-4 rounded-2xl text-sm shadow-md leading-relaxed ${
+                    <div className={`p-4 rounded-2xl text-xs shadow-lg leading-relaxed ${
                       msg.sender === 'user' 
-                        ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-tr-none' 
-                        : 'bg-gray-750/90 border border-gray-700/70 text-gray-200 rounded-tl-none'
+                        ? 'bg-gradient-to-r from-cyan-premium to-purple-premium text-white rounded-tr-none' 
+                        : 'bg-[#101622]/90 border border-dark-border text-gray-200 rounded-tl-none'
                     }`}>
                       {msg.sender === 'user' ? (
-                        <p>{msg.text}</p>
+                        <p className="whitespace-pre-wrap">{msg.text}</p>
                       ) : (
                         <div className="space-y-1">
                           {renderMarkdown(msg.text)}
                         </div>
                       )}
-                      <span className="block text-[10px] text-gray-400 mt-2 text-right">
+                      <span className="block text-[9px] text-gray-500 mt-2.5 text-right font-mono font-bold tracking-wider uppercase">
                         {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
                     </div>
@@ -395,14 +425,14 @@ const AIPage = () => {
               {/* Typing Indicator */}
               {sending && (
                 <div className="flex justify-start">
-                  <div className="flex items-center gap-2.5 max-w-[85%]">
-                    <div className="p-2 rounded-xl bg-purple-600/20 border border-purple-500/30 text-purple-400 shrink-0 animate-pulse">
-                      <FaRobot className="text-sm" />
+                  <div className="flex items-center gap-3 max-w-[85%]">
+                    <div className="p-2.5 rounded-xl bg-purple-premium/15 border border-purple-premium/25 text-purple-premium shrink-0 animate-pulse">
+                      <FaRobot className="text-xs" />
                     </div>
-                    <div className="flex gap-1.5 items-center bg-gray-750/50 border border-gray-700/40 rounded-2xl px-4 py-3 shadow-inner">
-                      <div className="h-1.5 w-1.5 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                      <div className="h-1.5 w-1.5 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                      <div className="h-1.5 w-1.5 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                    <div className="flex gap-1.5 items-center bg-[#101622]/70 border border-dark-border rounded-2xl px-4 py-3 shadow-inner">
+                      <div className="h-1.5 w-1.5 bg-cyan-premium rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                      <div className="h-1.5 w-1.5 bg-cyan-premium rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                      <div className="h-1.5 w-1.5 bg-cyan-premium rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
                     </div>
                   </div>
                 </div>
@@ -417,9 +447,11 @@ const AIPage = () => {
                 e.preventDefault();
                 handleSendMessage();
               }}
-              className="p-3 bg-gray-900/40 border-t border-gray-700/60 flex items-center gap-3 w-full"
+              className="p-4 bg-[#0f172a]/60 border-t border-dark-border/40 flex items-center gap-3 w-full"
             >
+              {/* Text Input area - Translucent Dark Background with White Text! Completely fixed styling and highly visible */}
               <input
+                ref={inputRef}
                 type="text"
                 value={inputVal}
                 onChange={(e) => setInputVal(e.target.value)}
@@ -429,16 +461,17 @@ const AIPage = () => {
                     handleSendMessage();
                   }
                 }}
-                placeholder="Ask me about your spending, saving advice, or budgets..."
+                placeholder="Ask financial advice or spending forecasts..."
                 disabled={sending}
-                className="flex-1 bg-white border border-gray-300 rounded-xl px-4 py-3 text-black placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-sm font-medium transition-all duration-300"
+                className="flex-1 bg-[#0f172a]/85 border border-dark-border rounded-xl px-4 py-3.5 text-white placeholder-gray-500 focus:outline-none focus:border-cyan-premium focus:shadow-cyan-glow text-xs font-semibold transition-all duration-300"
               />
+              
               <button
                 type="submit"
                 disabled={sending || !inputVal.trim()}
-                className="p-3.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl transition-all duration-300 flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed hover:shadow-lg hover:shadow-purple-500/20"
+                className="p-3.5 bg-gradient-to-r from-cyan-premium to-purple-premium text-white rounded-xl transition-all duration-300 flex items-center justify-center disabled:opacity-40 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-cyan-premium/30 active:translate-y-0"
               >
-                <FaPaperPlane className="text-sm" />
+                <FaPaperPlane className="text-xs" />
               </button>
             </form>
 
