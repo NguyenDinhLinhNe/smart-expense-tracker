@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { getAIPredictions, getAIRecommendations, askAIChat } from '../services/api';
+import { getAIPredictions, getAIRecommendations, askAIChat, getDashboardData } from '../services/api';
 import { 
   FaBrain, 
   FaChartLine, 
@@ -10,14 +10,19 @@ import {
   FaUser, 
   FaCommentDots,
   FaChevronRight,
-  FaDatabase
+  FaDatabase,
+  FaPiggyBank,
+  FaMoneyBillWave,
+  FaRegCompass
 } from 'react-icons/fa';
 import toast from 'react-hot-toast';
+import { formatVND } from '../services/utils';
 
 const AIPage = () => {
   const [loading, setLoading] = useState(true);
   const [predictions, setPredictions] = useState(null);
   const [recommendations, setRecommendations] = useState([]);
+  const [dashboardData, setDashboardData] = useState(null);
   const [selectedMonth, setSelectedMonth] = useState('2024-12');
   const [activeTab, setActiveTab] = useState('insights'); // 'insights' | 'chat'
   
@@ -58,12 +63,14 @@ const AIPage = () => {
   const fetchAIData = async () => {
     try {
       setLoading(true);
-      const [predRes, recRes] = await Promise.all([
+      const [predRes, recRes, dashRes] = await Promise.all([
         getAIPredictions(selectedMonth),
-        getAIRecommendations()
+        getAIRecommendations(),
+        getDashboardData()
       ]);
       setPredictions(predRes.data);
       setRecommendations(recRes.data.recommendations);
+      setDashboardData(dashRes.data);
     } catch (error) {
       toast.error("Failed to fetch AI insights");
     } finally {
@@ -184,7 +191,7 @@ const AIPage = () => {
             <FaBrain className="text-2xl" />
           </div>
           <div>
-            <h2 className="text-xl font-extrabold text-white tracking-wide uppercase font-heading">AI Financial Copilot</h2>
+            <h2 className="text-xl font-extrabold text-white tracking-wide uppercase font-heading">AI Financial</h2>
             <p className="text-xs text-gray-500 mt-0.5">Smart advisor and real-time automated cashflow forecasting</p>
           </div>
         </div>
@@ -242,7 +249,7 @@ const AIPage = () => {
               <div className="space-y-5">
                 <div>
                   <p className="text-gray-500 text-[10px] uppercase font-bold tracking-wider">PREDICTED OUTFLOW</p>
-                  <p className="text-3xl font-extrabold text-white mt-1.5 font-heading tracking-tight font-mono">${(predictions.predicted_expense ?? 0).toFixed(2)}</p>
+                  <p className="text-3xl font-extrabold text-white mt-1.5 font-heading tracking-tight font-mono">{formatVND(predictions.predicted_expense ?? 0)}</p>
                   <p className={`text-xs font-semibold mt-2.5 flex items-center gap-1 ${
                     (predictions.change_percentage ?? 0) > 0 ? 'text-rose-premium' : 'text-emerald-premium'
                   }`}>
@@ -255,7 +262,7 @@ const AIPage = () => {
                 <div className="border-t border-dark-border/40 pt-4">
                   <p className="text-gray-500 text-[10px] uppercase font-bold tracking-wider">PROJECTED INTENSITY PEAK</p>
                   <p className="text-sm font-bold text-white mt-1">
-                    {predictions.top_category || 'None'} <span className="font-mono text-cyan-premium text-xs ml-1.5">${(predictions.top_category_amount ?? 0).toFixed(2)}</span>
+                    {predictions.top_category || 'None'} <span className="font-mono text-cyan-premium text-xs ml-1.5">{formatVND(predictions.top_category_amount ?? 0)}</span>
                   </p>
                 </div>
               </div>
@@ -281,6 +288,127 @@ const AIPage = () => {
                 )}
               </div>
             </div>
+          </div>
+
+          {/* Personalized 50/30/20 Spending & Savings Plan */}
+          <div className="relative overflow-hidden bg-dark-glass border border-dark-border rounded-2xl p-6 shadow-xl hover:border-white/10 transition-all duration-300">
+            <div className="absolute w-40 h-40 bg-teal-premium blur-[45px] -top-12 -right-12 opacity-[0.03] rounded-full pointer-events-none"></div>
+            
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b border-dark-border/40 pb-4">
+              <div className="flex items-center gap-2.5">
+                <FaPiggyBank className="text-teal-premium text-base" />
+                <div>
+                  <h3 className="text-base font-extrabold text-white tracking-wide uppercase font-heading">Personalized 50/30/20 Spending & Savings Plan</h3>
+                  <p className="text-[10px] text-gray-500 mt-0.5">Automated asset allocation and saving target blueprints</p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setActiveTab('chat');
+                  const query = "Lập kế hoạch tiêu dùng tiết kiệm 50/30/20 cho tôi dựa trên số liệu thực tế";
+                  handleSendMessage(query);
+                }}
+                className="px-4 py-2 bg-gradient-to-r from-cyan-premium to-teal-premium hover:shadow-lg hover:shadow-cyan-premium/25 text-white text-xs font-bold tracking-wide uppercase rounded-xl transition-all duration-300 active:scale-95 flex items-center gap-2 self-start"
+              >
+                <FaRegCompass className="text-xs" />
+                <span>Auto-Draft AI Strategy</span>
+              </button>
+            </div>
+
+            {/* Plan calculations */}
+            {(() => {
+              const income = dashboardData?.total_income ? parseFloat(dashboardData.total_income) : 0;
+              const spent = dashboardData?.total_expense ? parseFloat(dashboardData.total_expense) : 0;
+              const displayIncome = income > 0 ? income : 1000; // Use $1000 generic base as a clean demo if income is 0
+              const isDemo = income === 0;
+
+              const needsLimit = displayIncome * 0.5;
+              const wantsLimit = displayIncome * 0.3;
+              const savingsGoal = displayIncome * 0.2;
+
+              return (
+                <div className="space-y-6">
+                  {isDemo && (
+                    <div className="p-3 bg-white/[0.02] border border-dashed border-dark-border rounded-xl text-center">
+                      <p className="text-[11px] text-cyan-premium leading-relaxed">
+                        💡 **Showing Starter Blueprint:** Please log your income in the ledger to activate your dynamic database allocation plan!
+                      </p>
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {/* Needs Column */}
+                    <div className="bg-[#101622]/40 border border-dark-border/40 p-4.5 rounded-xl space-y-3.5 relative overflow-hidden group">
+                      <div className="absolute top-0 left-0 h-1 bg-emerald-premium w-1/2"></div>
+                      <div>
+                        <div className="flex justify-between items-center text-[10px] text-gray-500 font-bold uppercase tracking-wider">
+                          <span>Essential Needs</span>
+                          <span className="text-emerald-premium">50% Cap</span>
+                        </div>
+                        <p className="text-xl font-extrabold text-white mt-1.5 font-mono">{formatVND(needsLimit)}</p>
+                      </div>
+                      
+                      <div className="space-y-1.5">
+                        <div className="flex justify-between text-[10px] text-gray-400">
+                          <span>Allocated Limit</span>
+                          <span className="font-mono font-bold">{formatVND(needsLimit)}</span>
+                        </div>
+                        <div className="w-full h-1.5 bg-[#090d16] rounded-full overflow-hidden">
+                          <div className="h-full bg-emerald-premium rounded-full" style={{ width: '50%' }}></div>
+                        </div>
+                      </div>
+                      <p className="text-[10px] text-gray-500 italic">For food, utilities, cozy rent & transport.</p>
+                    </div>
+
+                    {/* Wants Column */}
+                    <div className="bg-[#101622]/40 border border-dark-border/40 p-4.5 rounded-xl space-y-3.5 relative overflow-hidden">
+                      <div className="absolute top-0 left-0 h-1 bg-cyan-premium w-1/3"></div>
+                      <div>
+                        <div className="flex justify-between items-center text-[10px] text-gray-500 font-bold uppercase tracking-wider">
+                          <span>Personal Wants</span>
+                          <span className="text-cyan-premium">30% Cap</span>
+                        </div>
+                        <p className="text-xl font-extrabold text-white mt-1.5 font-mono">{formatVND(wantsLimit)}</p>
+                      </div>
+                      
+                      <div className="space-y-1.5">
+                        <div className="flex justify-between text-[10px] text-gray-400">
+                          <span>Allocated Limit</span>
+                          <span className="font-mono font-bold">{formatVND(wantsLimit)}</span>
+                        </div>
+                        <div className="w-full h-1.5 bg-[#090d16] rounded-full overflow-hidden">
+                          <div className="h-full bg-cyan-premium rounded-full" style={{ width: '30%' }}></div>
+                        </div>
+                      </div>
+                      <p className="text-[10px] text-gray-500 italic">For self-care, coffee trips, & leisure.</p>
+                    </div>
+
+                    {/* Savings Column */}
+                    <div className="bg-[#101622]/40 border border-dark-border/40 p-4.5 rounded-xl space-y-3.5 relative overflow-hidden">
+                      <div className="absolute top-0 left-0 h-1 bg-purple-premium w-1/5"></div>
+                      <div>
+                        <div className="flex justify-between items-center text-[10px] text-gray-500 font-bold uppercase tracking-wider">
+                          <span>Future Savings</span>
+                          <span className="text-purple-premium">20% Goal</span>
+                        </div>
+                        <p className="text-xl font-extrabold text-white mt-1.5 font-mono">{formatVND(savingsGoal)}</p>
+                      </div>
+                      
+                      <div className="space-y-1.5">
+                        <div className="flex justify-between text-[10px] text-gray-400">
+                          <span>Target Reserve</span>
+                          <span className="font-mono font-bold">{formatVND(savingsGoal)}</span>
+                        </div>
+                        <div className="w-full h-1.5 bg-[#090d16] rounded-full overflow-hidden">
+                          <div className="h-full bg-purple-premium rounded-full" style={{ width: '20%' }}></div>
+                        </div>
+                      </div>
+                      <p className="text-[10px] text-gray-500 italic">For your Peace Fund and financial freedom.</p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
 
           {/* Spending Alerts */}
@@ -324,8 +452,8 @@ const AIPage = () => {
                   {predictions?.category_comparison?.map((cat, index) => (
                     <tr key={index} className="hover:bg-white/[0.01] transition-colors duration-150">
                       <td className="py-4 px-6 text-white font-medium text-xs">{cat.name}</td>
-                      <td className="py-4 px-6 text-right font-bold text-xs font-mono text-gray-300">${(cat.current ?? 0).toFixed(2)}</td>
-                      <td className="py-4 px-6 text-right font-bold text-xs font-mono text-gray-400">${(cat.previous ?? 0).toFixed(2)}</td>
+                      <td className="py-4 px-6 text-right font-bold text-xs font-mono text-gray-300">{formatVND(cat.current ?? 0)}</td>
+                      <td className="py-4 px-6 text-right font-bold text-xs font-mono text-gray-400">{formatVND(cat.previous ?? 0)}</td>
                       <td className={`py-4 px-6 text-right font-bold text-xs font-mono ${
                         (cat.change ?? 0) > 0 ? 'text-rose-premium' : 'text-emerald-premium'
                       }`}>

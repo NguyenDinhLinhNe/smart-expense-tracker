@@ -11,7 +11,7 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = sessionStorage.getItem('token');
     if (token) {
       fetchUser();
     } else {
@@ -24,7 +24,7 @@ export const AuthProvider = ({ children }) => {
       const response = await getProfile();
       setUser(response.data.user);
     } catch (error) {
-      localStorage.removeItem('token');
+      sessionStorage.removeItem('token');
     } finally {
       setLoading(false);
     }
@@ -34,7 +34,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await loginAPI({ email, password });
       const { token, user } = response.data;
-      localStorage.setItem('token', token);
+      sessionStorage.setItem('token', token);
       setUser(user);
       toast.success('Login successful!');
       return { success: true };
@@ -48,7 +48,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await registerAPI(userData);
       const { token, user } = response.data;
-      localStorage.setItem('token', token);
+      sessionStorage.setItem('token', token);
       setUser(user);
       toast.success('Registration successful!');
       return { success: true };
@@ -59,7 +59,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
+    sessionStorage.removeItem('token');
     setUser(null);
     toast.success('Logged out successfully');
   };

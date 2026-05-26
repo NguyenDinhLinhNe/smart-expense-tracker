@@ -142,12 +142,12 @@ class AIService:
                     
                     if percentage >= 100:
                         recommendations.append({
-                            'message': f"BUDGET OVERRUN: You have spent {(percentage - 100):.1f}% over your limit for '{category_name}' (Spent ${cat_expense_amount:.2f} / Budget ${cat_budget_amount:.2f}). Consider freezing discretionary expenses here immediately.",
+                            'message': f"BUDGET OVERRUN: You have spent {(percentage - 100):.1f}% over your limit for '{category_name}' (Spent {cat_expense_amount:,.0f} ₫ / Budget {cat_budget_amount:,.0f} ₫). Consider freezing discretionary expenses here immediately.",
                             'potential_savings': float(cat_expense_amount - cat_budget_amount)
                         })
                     elif percentage >= 80:
                         recommendations.append({
-                            'message': f"BUDGET WARNING: Spending for '{category_name}' has reached {percentage:.1f}% of your allocated limit (Spent ${cat_expense_amount:.2f} / Limit ${cat_budget_amount:.2f}). Please watch your next transactions.",
+                            'message': f"BUDGET WARNING: Spending for '{category_name}' has reached {percentage:.1f}% of your allocated limit (Spent {cat_expense_amount:,.0f} ₫ / Limit {cat_budget_amount:,.0f} ₫). Please watch your next transactions.",
                             'potential_savings': float(cat_budget_amount * 0.1)
                         })
         else:
@@ -270,7 +270,7 @@ class AIService:
             
             if top_category and total_expense > 0 and (top_amount / total_expense) > 0.4:
                 recommendations.append({
-                    'message': f"HIGH RATIO: Spending on '{top_category.name}' represents {top_amount/total_expense*100:.1f}% of your historical expenses (${top_amount:.2f}). We recommend setting a targeted monthly budget.",
+                    'message': f"HIGH RATIO: Spending on '{top_category.name}' represents {top_amount/total_expense*100:.1f}% of your historical expenses ({top_amount:,.0f} ₫). We recommend setting a targeted monthly budget.",
                     'potential_savings': float(top_amount * 0.2)
                 })
         

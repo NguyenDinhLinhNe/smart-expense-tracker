@@ -12,6 +12,7 @@ import {
 } from 'chart.js';
 import { FaDownload, FaChevronDown, FaCalendarAlt, FaDatabase } from 'react-icons/fa';
 import toast from 'react-hot-toast';
+import { formatVND } from '../services/utils';
 
 ChartJS.register(
   CategoryScale,
@@ -239,7 +240,7 @@ const Reports = () => {
             TOTAL INCOME
           </p>
           <h3 className="text-3xl font-extrabold text-white mt-2 font-heading tracking-tight font-mono">
-            ${reportData.total_income?.toFixed(2) || 0}
+            {formatVND(reportData.total_income || 0)}
           </h3>
           <p className="text-[11px] text-gray-400 mt-1">Gross earnings for period</p>
         </div>
@@ -251,7 +252,7 @@ const Reports = () => {
             TOTAL EXPENSES
           </p>
           <h3 className="text-3xl font-extrabold text-white mt-2 font-heading tracking-tight font-mono">
-            ${reportData.total_expense?.toFixed(2) || 0}
+            {formatVND(reportData.total_expense || 0)}
           </h3>
           <p className="text-[11px] text-gray-400 mt-1">Paid bills and charges</p>
         </div>
@@ -263,7 +264,7 @@ const Reports = () => {
             NET SAVINGS
           </p>
           <h3 className="text-3xl font-extrabold text-white mt-2 font-heading tracking-tight font-mono">
-            ${(reportData.total_income - reportData.total_expense)?.toFixed(2) || 0}
+            {formatVND((reportData.total_income - reportData.total_expense) || 0)}
           </h3>
           <p className="text-[11px] text-gray-400 mt-1">Net accumulated margins</p>
         </div>
@@ -302,7 +303,7 @@ const Reports = () => {
               <div className="flex justify-between items-center p-4 bg-white/[0.01] border border-dark-border rounded-xl hover:bg-white/[0.03] transition-colors">
                 <span className="text-xs text-gray-400 font-semibold tracking-wider uppercase font-heading">Average Expenses</span>
                 <span className="text-white font-bold font-mono text-sm">
-                  ${(reportData.total_expense / (reportData.transaction_count || 1)).toFixed(2)}
+                  {formatVND(reportData.total_expense / (reportData.transaction_count || 1))}
                 </span>
               </div>
               
@@ -358,7 +359,7 @@ const Reports = () => {
                     <td className={`py-4 px-6 text-right font-bold tracking-tight text-xs ${
                       transaction.type === 'income' ? 'text-emerald-premium' : 'text-rose-premium'
                     }`}>
-                      {transaction.type === 'income' ? '+' : '-'}${Math.abs(transaction.amount).toFixed(2)}
+                      {transaction.type === 'income' ? '+' : '-'}{formatVND(Math.abs(transaction.amount))}
                     </td>
                   </tr>
                 ))

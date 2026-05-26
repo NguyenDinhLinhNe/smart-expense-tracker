@@ -11,7 +11,7 @@ const api = axios.create({
 
 // Add token to requests
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
+  const token = sessionStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -23,6 +23,7 @@ export const register = (userData) => api.post('/auth/register', userData);
 export const login = (userData) => api.post('/auth/login', userData);
 export const getProfile = () => api.get('/auth/profile');
 export const getUsers = () => api.get('/auth/users');
+export const resetPassword = (email, new_password) => api.post('/auth/reset-password', { email, new_password });
 
 // Transaction APIs
 export const getTransactions = (params) => api.get('/transactions', { params });

@@ -1,9 +1,14 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { getBudgets, createBudget, updateBudget, deleteBudget, getCategories } from '../services/api';
 import { FaPlus, FaEdit, FaTrash, FaTimes, FaExclamationTriangle, FaChevronDown } from 'react-icons/fa';
 import toast from 'react-hot-toast';
+import { formatVND } from '../services/utils';
 
 const Budgets = () => {
+  const [searchParams] = useSearchParams();
+  const highlightParam = searchParams.get('highlight');
+
   const [budgets, setBudgets] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -21,6 +26,38 @@ const Budgets = () => {
   useEffect(() => {
     fetchData();
   }, [selectedMonth, selectedYear]);
+
+  useEffect(() => {
+    if (!loading && highlightParam && budgets.length > 0) {
+      // Find the budget card by category name ID
+      const targetId = `budget-card-${highlightParam.toLowerCase()}`;
+      const element = document.getElementById(targetId);
+      if (element) {
+        const timer = setTimeout(() => {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          
+          // Apply premium cyan pulsing glow and ring effect
+          element.classList.add(
+            'ring-2', 
+            'ring-cyan-premium', 
+            'shadow-[0_0_25px_rgba(6,182,212,0.45)]', 
+            'scale-[1.02]'
+          );
+          
+          // Cleanup highlights after 4 seconds
+          setTimeout(() => {
+            element.classList.remove(
+              'ring-2', 
+              'ring-cyan-premium', 
+              'shadow-[0_0_25px_rgba(6,182,212,0.45)]', 
+              'scale-[1.02]'
+            );
+          }, 4000);
+        }, 400);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [loading, highlightParam, budgets]);
 
   const fetchData = async () => {
     try {
@@ -165,7 +202,11 @@ const Budgets = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {budgets.map(budget => (
-            <div key={budget.id} className="relative overflow-hidden bg-dark-glass border border-dark-border rounded-2xl p-6 shadow-xl hover:-translate-y-1 hover:border-white/10 transition-all duration-300 group">
+            <div 
+              key={budget.id} 
+              id={`budget-card-${budget.category_name.toLowerCase()}`}
+              className="relative overflow-hidden bg-dark-glass border border-dark-border rounded-2xl p-6 shadow-xl hover:-translate-y-1 hover:border-white/10 transition-[box-shadow,transform,border-color] duration-500 group"
+            >
               <div className="absolute w-32 h-32 bg-cyan-premium blur-[35px] -top-12 -right-12 opacity-[0.05] rounded-full pointer-events-none group-hover:opacity-10 transition-opacity"></div>
               
               <div className="flex justify-between items-start mb-4 relative z-10">
@@ -195,7 +236,7 @@ const Budgets = () => {
               <div className="mb-4 relative z-10">
                 <div className="flex justify-between text-xs mb-2">
                   <span className="text-gray-400">Total Spent</span>
-                  <span className="text-white font-semibold font-mono">${budget.spent.toFixed(2)} / ${budget.amount.toFixed(2)}</span>
+                  <span className="text-white font-semibold font-mono">{formatVND(budget.spent)} / {formatVND(budget.amount)}</span>
                 </div>
                 
                 <div className="w-full bg-white/[0.04] rounded-full h-3 overflow-hidden border border-white/[0.03] p-[1.5px]">
@@ -209,7 +250,7 @@ const Budgets = () => {
               <div className="flex justify-between text-xs relative z-10 border-t border-dark-border/40 pt-3">
                 <span className="text-gray-400">Balance Status</span>
                 <span className={`font-bold font-mono tracking-tight ${budget.remaining >= 0 ? 'text-emerald-premium' : 'text-rose-premium'}`}>
-                  {budget.remaining < 0 ? '-' : ''}${Math.abs(budget.remaining).toFixed(2)} {budget.remaining < 0 ? 'overspent' : 'remaining'}
+                  {budget.remaining < 0 ? '-' : ''}{formatVND(Math.abs(budget.remaining))} {budget.remaining < 0 ? 'overspent' : 'remaining'}
                 </span>
               </div>
               
@@ -278,15 +319,14 @@ const Budgets = () => {
               
               <div>
                 <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">
-                  Budget Amount ($)
+                  Budget Amount (VND)
                 </label>
                 <input
                   type="number"
-                  step="0.01"
                   value={formData.amount}
                   onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
                   className="w-full px-4 py-3 bg-[#0f172a]/80 border border-dark-border rounded-xl text-xs text-white placeholder-gray-600 outline-none focus:border-cyan-premium focus:shadow-cyan-glow transition-all"
-                  placeholder="0.00"
+                  placeholder="0"
                   required
                 />
               </div>

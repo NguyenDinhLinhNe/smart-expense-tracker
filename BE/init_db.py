@@ -21,7 +21,6 @@ def init_database():
         db.session.add(admin)
         db.session.commit()
         
-        # Create categories for admin (Global Categories)
         categories = [
             {'name': 'Food', 'icon': '🍔', 'color': '#FF6B6B', 'type': 'expense'},
             {'name': 'Transport', 'icon': '🚗', 'color': '#4ECDC4', 'type': 'expense'},
@@ -49,16 +48,16 @@ def init_database():
         category_dict = {c.name: c for c in categories_db}
         
         sample_transactions = [
-            {'amount': 5000, 'type': 'income', 'category': 'Salary', 'date': datetime.now() - timedelta(days=30), 'note': 'Monthly salary'},
-            {'amount': 200, 'type': 'expense', 'category': 'Food', 'date': datetime.now() - timedelta(days=28), 'note': 'Groceries'},
-            {'amount': 50, 'type': 'expense', 'category': 'Transport', 'date': datetime.now() - timedelta(days=25), 'note': 'Gas'},
-            {'amount': 150, 'type': 'expense', 'category': 'Shopping', 'date': datetime.now() - timedelta(days=22), 'note': 'Clothes'},
-            {'amount': 30, 'type': 'expense', 'category': 'Entertainment', 'date': datetime.now() - timedelta(days=20), 'note': 'Netflix'},
-            {'amount': 100, 'type': 'expense', 'category': 'Bills', 'date': datetime.now() - timedelta(days=18), 'note': 'Electricity'},
-            {'amount': 1000, 'type': 'income', 'category': 'Freelance', 'date': datetime.now() - timedelta(days=15), 'note': 'Web project'},
-            {'amount': 80, 'type': 'expense', 'category': 'Food', 'date': datetime.now() - timedelta(days=12), 'note': 'Restaurant'},
-            {'amount': 40, 'type': 'expense', 'category': 'Transport', 'date': datetime.now() - timedelta(days=10), 'note': 'Uber'},
-            {'amount': 200, 'type': 'expense', 'category': 'Shopping', 'date': datetime.now() - timedelta(days=8), 'note': 'Electronics'},
+            {'amount': 30000000, 'type': 'income', 'category': 'Salary', 'date': datetime.now() - timedelta(days=30), 'note': 'Monthly salary'},
+            {'amount': 1200000, 'type': 'expense', 'category': 'Food', 'date': datetime.now() - timedelta(days=28), 'note': 'Groceries'},
+            {'amount': 350000, 'type': 'expense', 'category': 'Transport', 'date': datetime.now() - timedelta(days=25), 'note': 'Gas'},
+            {'amount': 950000, 'type': 'expense', 'category': 'Shopping', 'date': datetime.now() - timedelta(days=22), 'note': 'Clothes'},
+            {'amount': 260000, 'type': 'expense', 'category': 'Entertainment', 'date': datetime.now() - timedelta(days=20), 'note': 'Netflix'},
+            {'amount': 600000, 'type': 'expense', 'category': 'Bills', 'date': datetime.now() - timedelta(days=18), 'note': 'Electricity'},
+            {'amount': 15000000, 'type': 'income', 'category': 'Freelance', 'date': datetime.now() - timedelta(days=15), 'note': 'Web project'},
+            {'amount': 450000, 'type': 'expense', 'category': 'Food', 'date': datetime.now() - timedelta(days=12), 'note': 'Restaurant'},
+            {'amount': 120000, 'type': 'expense', 'category': 'Transport', 'date': datetime.now() - timedelta(days=10), 'note': 'Uber'},
+            {'amount': 2500000, 'type': 'expense', 'category': 'Shopping', 'date': datetime.now() - timedelta(days=8), 'note': 'Electronics'},
         ]
         
         for trans in sample_transactions:
